@@ -3,8 +3,9 @@ import { db } from '../dbConn.js';
 
 const users = Router();
 
-users.get('/', (req, res) => {
-  res.json(console.log("Hello From Users"))
+users.get('/', async (req, res) => {
+  const result = await db.query('SELECT * FROM users');
+  res.json(result.rows);
 });
 
 export default users;
