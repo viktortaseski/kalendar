@@ -1,13 +1,16 @@
-# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+.env
+.env.local
+.env.*.local
 
-# Compiled output
-/dist
+# Compiled output (any subproject)
+**/dist
+**/build
+**/out-tsc
 /tmp
-/out-tsc
 /bazel-out
 
 # Node
-/node_modules
+**/node_modules
 npm-debug.log
 yarn-error.log
 
@@ -29,8 +32,8 @@ yarn-error.log
 !.vscode/mcp.json
 .history/*
 
-# Miscellaneous
-/.angular/cache
+# Angular
+**/.angular/cache
 .sass-cache/
 /connect.lock
 /coverage

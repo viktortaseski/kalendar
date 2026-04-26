@@ -1,0 +1,28 @@
+<article class="card" [class.featured]="plan().featured">
+  @if (plan().featured) {
+    <span class="badge">Most popular</span>
+  }
+
+  <header class="card-head">
+    <h2 class="title">{{ plan().type }}</h2>
+    <p class="card-desc">{{ plan().description }}</p>
+    <div class="price">
+      <span class="amount">${{ plan().price }}</span>
+      <span class="period">/month</span>
+    </div>
+  </header>
+
+  <ul class="features">
+    @for (feature of plan().features; track feature) {
+      <li>
+        <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span>{{ feature }}</span>
+      </li>
+    }
+  </ul>
+
+  <button class="btn" type="button">{{ plan().cta }}</button>
+</article>

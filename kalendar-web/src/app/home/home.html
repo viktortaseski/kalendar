@@ -1,0 +1,160 @@
+<section class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="container hero-inner">
+    <div class="hero-content">
+      <span class="eyebrow">
+        <span class="dot"></span>
+        Now booking 10,000+ appointments daily
+      </span>
+      <h1 class="hero-title">
+        Booking your business <em>shouldn't</em> feel like work.
+      </h1>
+      <p class="hero-sub">
+        Kalendar gives small businesses a beautiful online calendar where customers
+        book appointments in seconds — no phone calls, no back-and-forth.
+      </p>
+      <div class="hero-cta">
+        <a routerLink="/pricing" class="btn-primary-lg">Start free trial</a>
+        <a href="#how" class="btn-ghost">See how it works →</a>
+      </div>
+      <ul class="hero-meta">
+        <li>14-day free trial</li>
+        <li>No credit card required</li>
+        <li>Cancel anytime</li>
+      </ul>
+    </div>
+
+    <div class="hero-visual">
+      <div class="calendar-widget">
+        <div class="cal-header">
+          <span class="cal-month">April 2026</span>
+          <div class="cal-controls">
+            <button class="cal-arrow" aria-label="Previous month">‹</button>
+            <button class="cal-arrow" aria-label="Next month">›</button>
+          </div>
+        </div>
+        <div class="cal-weekdays">
+          <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+        </div>
+        <div class="cal-grid">
+          @for (day of days; track $index) {
+            <span class="cal-day"
+                  [class.muted]="day.muted"
+                  [class.selected]="day.n === 25 && !day.muted">
+              {{ day.n }}
+            </span>
+          }
+        </div>
+        <div class="cal-slots">
+          <span class="slot-label">Available · April 25</span>
+          <div class="slot-row">
+            <button class="slot">9:00</button>
+            <button class="slot">10:30</button>
+            <button class="slot active">11:00</button>
+            <button class="slot">2:00</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="floating-card card-success">
+        <div class="card-icon">✓</div>
+        <div class="card-text">
+          <div class="card-title">Booked!</div>
+          <div class="card-sub">Sarah · Hair appointment</div>
+        </div>
+      </div>
+
+      <div class="floating-card card-stats">
+        <div class="avatar-stack">
+          <span class="avatar a-1">M</span>
+          <span class="avatar a-2">J</span>
+          <span class="avatar a-3">+</span>
+        </div>
+        <div class="card-text">
+          <div class="card-title">12 bookings today</div>
+          <div class="card-sub">↑ 24% vs last week</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="logos">
+  <div class="container">
+    <p class="logos-label">Trusted by 2,000+ small businesses</p>
+    <div class="logos-row">
+      <span>Bloom Studio</span>
+      <span>Atlas Clinic</span>
+      <span>Forge Barber Co.</span>
+      <span>Mira Wellness</span>
+      <span>Northbeam Yoga</span>
+      <span>Petal &amp; Stem</span>
+    </div>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="dot"></span> Everything you need</span>
+      <h2 class="section-title">Run your bookings like the <em>pros</em>.</h2>
+      <p class="section-sub">From a barbershop with two chairs to a clinic with twenty staff — Kalendar scales with your team.</p>
+    </div>
+    <div class="features-grid">
+      @for (f of features; track f.title) {
+        <article class="feature-card">
+          <div class="feature-icon">{{ f.icon }}</div>
+          <h3>{{ f.title }}</h3>
+          <p>{{ f.body }}</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="how" id="how">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow"><span class="dot"></span> How it works</span>
+      <h2 class="section-title">Live in <em>under 10 minutes</em>.</h2>
+      <p class="section-sub">Three steps from signing up to taking your first online booking.</p>
+    </div>
+    <ol class="steps">
+      @for (step of steps; track step.num) {
+        <li class="step">
+          <span class="step-num">{{ step.num }}</span>
+          <h3>{{ step.title }}</h3>
+          <p>{{ step.body }}</p>
+        </li>
+      }
+    </ol>
+  </div>
+</section>
+
+<section class="quote">
+  <div class="container">
+    <blockquote>
+      <p>
+        "We went from juggling a paper book and three phone lines to <em>all bookings online</em>.
+        Our no-show rate dropped from 18% to 4% in the first month."
+      </p>
+      <footer>
+        <span class="quote-avatar">M</span>
+        <div>
+          <div class="quote-name">Maria Chen</div>
+          <div class="quote-role">Owner, Bloom Hair Studio</div>
+        </div>
+      </footer>
+    </blockquote>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <div class="cta-card">
+      <h2>Ready to give your customers a better way to book?</h2>
+      <p>Start your free 14-day trial. No credit card needed.</p>
+      <a routerLink="/pricing" class="btn-light">See pricing →</a>
+    </div>
+  </div>
+</section>

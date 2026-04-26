@@ -1,0 +1,31 @@
+<section class="pricing-page">
+  <div class="container">
+    <header class="pricing-head">
+      <span class="eyebrow"><span class="dot"></span> Pricing</span>
+      <h1 class="page-title">Simple pricing. <em>Real value.</em></h1>
+      <p class="page-sub">Try free for 14 days. Pick the plan that fits, change anytime.</p>
+    </header>
+
+    <div class="cards">
+      @for (plan of plans; track plan.type) {
+        <app-pricing-card [plan]="plan" />
+      }
+    </div>
+
+    <p class="pricing-note">
+      All plans include unlimited customers, mobile app access, and a 30-day money-back guarantee.
+    </p>
+
+    <section class="faq">
+      <h2 class="faq-title">Frequently asked</h2>
+      <div class="faq-grid">
+        @for (item of faqs; track item.q) {
+          <div class="faq-item">
+            <h3>{{ item.q }}</h3>
+            <p>{{ item.a }}</p>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</section>

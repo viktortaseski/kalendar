@@ -1,0 +1,91 @@
+:host {
+  display: block;
+}
+
+.pricing-page {
+  padding: var(--space-20) 0 var(--space-12);
+}
+
+.pricing-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-16);
+}
+
+.page-title {
+  font-size: clamp(40px, 6vw, 68px);
+  letter-spacing: -0.035em;
+  max-width: 16ch;
+}
+
+.page-sub {
+  font-size: 18px;
+  color: var(--color-ink-muted);
+  max-width: 52ch;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 420px));
+  justify-content: center;
+  gap: var(--space-6);
+  align-items: stretch;
+}
+
+.pricing-note {
+  text-align: center;
+  margin-top: var(--space-10);
+  color: var(--color-ink-muted);
+  font-size: 14px;
+}
+
+.faq {
+  margin-top: var(--space-24);
+  padding-top: var(--space-16);
+  border-top: 1px solid var(--color-border);
+}
+
+.faq-title {
+  font-size: clamp(28px, 3.5vw, 40px);
+  text-align: center;
+  margin-bottom: var(--space-12);
+  letter-spacing: -0.025em;
+}
+
+.faq-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-10) var(--space-12);
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.faq-item {
+  h3 {
+    font-size: 17px;
+    margin-bottom: var(--space-2);
+    letter-spacing: -0.01em;
+  }
+
+  p {
+    color: var(--color-ink-muted);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 800px) {
+  .cards {
+    grid-template-columns: 1fr;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .faq-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+}

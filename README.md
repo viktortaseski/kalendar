@@ -1,59 +1,44 @@
 # Kalendar
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.2.
+Online booking platform for small businesses.
 
-## Development server
+## Project layout
 
-To start a local development server, run:
-
-```bash
-ng serve
+```
+kalendar/
+├── kalendar-web/   # Angular 21 frontend (runs on :4200)
+└── kalendar-api/   # Express + TypeScript backend (runs on :3000)
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+The two projects are independent — each has its own `package.json` and `node_modules`. They communicate over HTTP.
 
-## Code scaffolding
+## Running locally
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+You need **two terminals**, one for each service.
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Terminal 1 — backend
 
 ```bash
-ng generate --help
+cd kalendar-api
+npm install        # first time only
+npm run dev        # starts on http://localhost:3000
 ```
 
-## Building
+Available endpoints:
+- `GET  /api/health` — health check
+- `GET  /api/plans` — list pricing plans
+- `POST /api/bookings` — create a booking (body: `{ "name": "...", "slot": "..." }`)
 
-To build the project run:
+### Terminal 2 — frontend
 
 ```bash
-ng build
+cd kalendar-web
+npm install        # first time only (already done)
+npm start          # starts on http://localhost:4200
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## How the pieces fit
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- The Angular app (browser) calls the API using `HttpClient`.
+- The API has CORS configured to accept requests from `http://localhost:4200`.
+- The API is currently in-memory; a database will be added next.
