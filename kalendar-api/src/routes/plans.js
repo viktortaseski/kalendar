@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { db } from '../dbConn';
+import { db } from '../dbConn.js';
 
 const plans = Router();
 

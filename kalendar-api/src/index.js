@@ -1,5 +1,4 @@
 import express from 'express';
-import { db } from './dbConn.js';
 import plans from './routes/plans.js';
 import users from './routes/users.js';
 
