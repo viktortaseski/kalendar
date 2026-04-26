@@ -1,6 +1,5 @@
 :host {
-  display: flex;
-  flex-direction: column;
+  display: block;
   min-height: 100vh;
 }
 
@@ -8,6 +7,97 @@ main {
   flex: 1;
 }
 
+/* ─── Authenticated layout (sidebar + main) ─── */
+.app-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+.app-main {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.mobile-topbar {
+  display: none;
+}
+
+.sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .mobile-topbar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .hamburger {
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    border-radius: var(--radius-sm);
+    transition: background 0.15s;
+
+    span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: var(--color-ink);
+      border-radius: 1px;
+    }
+
+    &:hover {
+      background: var(--color-bg-elevated);
+    }
+  }
+
+  .m-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--color-ink);
+    font-size: 16px;
+
+    .logo-mark {
+      width: 28px;
+      height: 28px;
+      font-size: 16px;
+    }
+  }
+
+  .app-shell.nav-open .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 99;
+  }
+}
+
+/* ─── Guest layout footer ─── */
 .site-footer {
   border-top: 1px solid var(--color-border);
   padding: var(--space-12) 0;

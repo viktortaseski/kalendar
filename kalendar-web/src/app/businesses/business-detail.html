@@ -1,0 +1,194 @@
+<section class="page">
+  <div class="container">
+    @if (loading()) {
+      <div class="state-msg">Loading…</div>
+    } @else if (errorMessage()) {
+      <div class="state-msg error">
+        {{ errorMessage() }}
+        <div><a routerLink="/businesses">← Back to all businesses</a></div>
+      </div>
+    } @else if (business(); as b) {
+      <a routerLink="/businesses" class="back-link">← All businesses</a>
+
+      <header class="biz-header">
+        <div class="biz-header-top">
+          <span class="plan-pill">{{ b.plan_type }}</span>
+          @if (isOwner()) {
+            <a [routerLink]="['/businesses', b.slug, 'manage']" class="manage-btn">
+              Manage business →
+            </a>
+          }
+        </div>
+        <h1 class="biz-name">{{ b.name }}</h1>
+        @if (b.description) {
+          <p class="biz-desc">{{ b.description }}</p>
+        }
+        <div class="biz-meta">
+          <span>{{ b.timezone }}</span>
+          <span class="dot-sep">·</span>
+          <span>{{ b.slot_duration_minutes }} min slots</span>
+          <span class="dot-sep">·</span>
+          <span>{{ staff().length }} staff</span>
+        </div>
+      </header>
+
+      <!-- Staff & their schedules -->
+      @if (staff().length > 0) {
+        <section class="staff-section">
+          <h2 class="section-title">Our team</h2>
+          <div class="staff-grid">
+            @for (member of staff(); track member.id) {
+              <article class="staff-card">
+                <header class="staff-head">
+                  <div class="staff-avatar">{{ member.name.charAt(0) }}</div>
+                  <div>
+                    <div class="staff-name">{{ member.name }}</div>
+                    @if (member.email) {
+                      <div class="staff-email">{{ member.email }}</div>
+                    }
+                  </div>
+                </header>
+
+                <div class="schedule">
+                  <h3 class="schedule-title">Weekly schedule</h3>
+                  @if (member.working_hours.length === 0) {
+                    <p class="schedule-empty">No hours set yet.</p>
+                  } @else {
+                    <ul class="day-list">
+                      @for (day of weekFor(member); track day.label) {
+                        <li class="day" [class.closed]="day.hours.length === 0">
+                          <span class="day-name">{{ day.label }}</span>
+                          @if (day.hours.length === 0) {
+                            <span class="day-times closed-text">Closed</span>
+                          } @else {
+                            <span class="day-times">
+                              @for (h of day.hours; track $index; let last = $last) {
+                                <span>
+                                  {{ formatTime(h.start_time) }} – {{ formatTime(h.end_time) }}
+                                </span>
+                                @if (!last) { <span class="and">·</span> }
+                              }
+                            </span>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  }
+                </div>
+                <button class="btn-primary-lg" (click)="openBooking(member)">Book an appointment</button>
+              </article>
+            }
+          </div>
+        </section>
+      }
+
+
+    }
+  </div>
+
+  <!-- ── Booking modal ──────────────────────────────────────── -->
+  @if (selectedMember(); as member) {
+    <div class="booking-overlay" (click)="closeBooking()">
+      <div class="booking-modal" (click)="$event.stopPropagation()">
+
+        <div class="bm-header">
+          <span class="bm-title">
+            @if (bookingStep() === 'done') { Appointment confirmed }
+            @else { Book with {{ member.name }} }
+          </span>
+          <button class="bm-close" (click)="closeBooking()">✕</button>
+        </div>
+
+        @if (bookingStep() === 'calendar') {
+          <div class="bm-body">
+            <div class="cal-nav">
+              <button class="cal-nav-btn" (click)="prevMonth()">‹</button>
+              <span class="cal-month-label">{{ calMonthLabel() }}</span>
+              <button class="cal-nav-btn" (click)="nextMonth()">›</button>
+            </div>
+            <div class="cal-grid">
+              @for (dow of calDow; track dow) {
+                <div class="cal-dow-label">{{ dow }}</div>
+              }
+              @for (cell of calDays(); track $index) {
+                @if (!cell) {
+                  <div></div>
+                } @else {
+                  <button
+                    class="cal-day"
+                    [class.cal-day--disabled]="cell.disabled"
+                    [class.cal-day--selected]="cell.dateStr === selectedDate()"
+                    [disabled]="cell.disabled"
+                    (click)="selectDate(cell.dateStr)"
+                  >{{ cell.date.getDate() }}</button>
+                }
+              }
+            </div>
+          </div>
+        }
+
+        @if (bookingStep() === 'slots') {
+          <div class="bm-body">
+            <button class="bm-back" (click)="bookingStep.set('calendar')">← Back</button>
+            <p class="bm-date-label">{{ formatSelectedDate() }}</p>
+            @if (slotsLoading()) {
+              <p class="bm-state">Loading available slots…</p>
+            } @else if (availableSlots().length === 0) {
+              <p class="bm-state">No available slots on this day</p>
+            } @else {
+              <div class="slots-grid">
+                @for (slot of availableSlots(); track slot) {
+                  <button class="slot-btn" (click)="selectSlot(slot)">{{ formatSlot(slot) }}</button>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @if (bookingStep() === 'form') {
+          <div class="bm-body">
+            <button class="bm-back" (click)="bookingStep.set('slots')">← Back</button>
+            <p class="bm-date-label">{{ formatSelectedDate() }} · {{ formatSlot(selectedSlot()!) }}</p>
+            <div class="form-fields">
+              <label class="form-label">
+                Name *
+                <input #nameInput class="form-input" type="text" placeholder="Your full name">
+              </label>
+              <label class="form-label">
+                Email *
+                <input #emailInput class="form-input" type="email" placeholder="your@email.com">
+              </label>
+              <label class="form-label">
+                Phone
+                <input #phoneInput class="form-input" type="tel" placeholder="Optional">
+              </label>
+              <label class="form-label">
+                Notes
+                <textarea #notesInput class="form-input form-textarea" placeholder="Anything we should know?"></textarea>
+              </label>
+            </div>
+            @if (bookingError()) {
+              <p class="bm-error">{{ bookingError() }}</p>
+            }
+            <button
+              class="btn-book"
+              [disabled]="bookingLoading()"
+              (click)="confirmBooking(nameInput.value, emailInput.value, phoneInput.value, notesInput.value)"
+            >{{ bookingLoading() ? 'Booking…' : 'Confirm booking' }}</button>
+          </div>
+        }
+
+        @if (bookingStep() === 'done') {
+          <div class="bm-body bm-done">
+            <div class="done-check">✓</div>
+            <p class="done-heading">You're booked!</p>
+            <p class="done-detail">{{ formatSelectedDate() }} at {{ formatSlot(selectedSlot()!) }}</p>
+            <p class="done-detail">A confirmation will be sent to your email.</p>
+            <button class="btn-book" (click)="closeBooking()">Done</button>
+          </div>
+        }
+
+      </div>
+    </div>
+  }
+</section>

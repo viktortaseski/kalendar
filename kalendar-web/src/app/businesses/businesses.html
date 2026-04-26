@@ -1,0 +1,46 @@
+<section class="page">
+  <div class="container">
+    <header class="page-head">
+      <span class="eyebrow"><span class="dot"></span> Browse</span>
+      <h1 class="page-title">Find a business</h1>
+      <p class="page-sub">Search salons, clinics, studios — book in seconds.</p>
+    </header>
+
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        placeholder="Search by name or description"
+        [ngModel]="query"
+        (ngModelChange)="onQueryChange($event)"
+        autocomplete="off"
+      />
+    </div>
+
+    @if (errorMessage()) {
+      <div class="state-msg error">{{ errorMessage() }}</div>
+    } @else if (loading()) {
+      <div class="state-msg">Loading…</div>
+    } @else if (results().length === 0) {
+      <div class="state-msg empty">
+        @if (query) {
+          No businesses match "<strong>{{ query }}</strong>".
+        } @else {
+          No businesses yet. Be the first to <a routerLink="/businesses/new">create one</a>.
+        }
+      </div>
+    } @else {
+      <div class="biz-grid">
+        @for (b of results(); track b.id) {
+          <a class="biz-card" [routerLink]="['/businesses', b.slug]">
+            <h3>{{ b.name }}</h3>
+            @if (b.description) {
+              <p>{{ b.description }}</p>
+            }
+            <span class="biz-meta">{{ b.timezone }} · /{{ b.slug }}</span>
+          </a>
+        }
+      </div>
+    }
+  </div>
+</section>

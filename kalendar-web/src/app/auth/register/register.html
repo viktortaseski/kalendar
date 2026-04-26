@@ -1,0 +1,79 @@
+<section class="auth-page">
+  <div class="auth-card">
+    <header class="auth-head">
+      <a routerLink="/" class="logo-mark" aria-label="Home">K</a>
+      <h1 class="auth-title">Create your account</h1>
+      <p class="auth-sub">Start booking — or open your business — in minutes.</p>
+    </header>
+
+    <form class="auth-form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <label class="field">
+        <span class="field-label">Full name</span>
+        <input
+          type="text"
+          formControlName="fullName"
+          placeholder="Maria Chen"
+          autocomplete="name"
+          [class.invalid]="form.controls.fullName.touched && form.controls.fullName.invalid"
+        />
+        @if (form.controls.fullName.touched && form.controls.fullName.errors; as errs) {
+          <span class="field-error">
+            @if (errs['required']) { Name is required }
+            @else if (errs['minlength']) { At least 2 characters }
+          </span>
+        }
+      </label>
+
+      <label class="field">
+        <span class="field-label">Email</span>
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="you@example.com"
+          autocomplete="email"
+          [class.invalid]="form.controls.email.touched && form.controls.email.invalid"
+        />
+        @if (form.controls.email.touched && form.controls.email.errors; as errs) {
+          <span class="field-error">
+            @if (errs['required']) { Email is required }
+            @else if (errs['email']) { Enter a valid email }
+          </span>
+        }
+      </label>
+
+      <label class="field">
+        <span class="field-label">Password</span>
+        <input
+          type="password"
+          formControlName="password"
+          placeholder="At least 8 characters"
+          autocomplete="new-password"
+          [class.invalid]="form.controls.password.touched && form.controls.password.invalid"
+        />
+        @if (form.controls.password.touched && form.controls.password.errors; as errs) {
+          <span class="field-error">
+            @if (errs['required']) { Password is required }
+            @else if (errs['minlength']) { At least 8 characters }
+          </span>
+        }
+      </label>
+
+      @if (errorMessage()) {
+        <div class="form-error">{{ errorMessage() }}</div>
+      }
+
+      <button type="submit" class="btn-submit" [disabled]="submitting()">
+        {{ submitting() ? 'Creating account…' : 'Create account' }}
+      </button>
+
+      <p class="terms">
+        By signing up, you agree to our
+        <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.
+      </p>
+    </form>
+
+    <footer class="auth-footer">
+      Already have an account? <a routerLink="/login">Log in</a>
+    </footer>
+  </div>
+</section>

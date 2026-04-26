@@ -7,14 +7,21 @@
 
     <nav class="nav-links">
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
+      <a routerLink="/businesses" routerLinkActive="active">Browse</a>
       <a routerLink="/pricing" routerLinkActive="active">Pricing</a>
-      <a href="#features">Features</a>
-      <a href="#how">How it works</a>
+      @if (auth.isLoggedIn()) {
+        <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      }
     </nav>
 
     <div class="nav-actions">
-      <a class="link-btn" href="#">Log in</a>
-      <a routerLink="/pricing" class="btn-cta">Get started</a>
+      @if (auth.isLoggedIn()) {
+        <span class="user-pill">{{ auth.currentUser()?.fullName }}</span>
+        <button type="button" class="link-btn" (click)="logout()">Log out</button>
+      } @else {
+        <a class="link-btn" routerLink="/login">Log in</a>
+        <a routerLink="/register" class="btn-cta">Get started</a>
+      }
     </div>
   </div>
 </header>

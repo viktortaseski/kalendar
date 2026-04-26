@@ -1,18 +1,42 @@
-<app-nav></app-nav>
-<main>
-  <router-outlet></router-outlet>
-</main>
-<footer class="site-footer">
-  <div class="container footer-inner">
-    <a class="footer-brand" routerLink="/">
-      <span class="logo-mark">K</span>
-      <span class="logo-text">Kalendar</span>
-    </a>
-    <p class="footer-copy">© 2026 Kalendar. Booking made effortless.</p>
-    <div class="footer-links">
-      <a href="#">Privacy</a>
-      <a href="#">Terms</a>
-      <a href="#">Contact</a>
-    </div>
+@if (auth.isLoggedIn()) {
+  <div class="app-shell" [class.nav-open]="mobileNavOpen()">
+    <header class="mobile-topbar">
+      <button type="button" class="hamburger" (click)="toggleMobileNav()" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <a routerLink="/dashboard" class="m-brand">
+        <span class="logo-mark">K</span>
+        <span class="m-brand-text">Kalendar</span>
+      </a>
+    </header>
+
+    <app-sidebar [open]="mobileNavOpen()"></app-sidebar>
+
+    @if (mobileNavOpen()) {
+      <div class="sidebar-backdrop" (click)="closeMobileNav()"></div>
+    }
+
+    <main class="app-main">
+      <router-outlet></router-outlet>
+    </main>
   </div>
-</footer>
+} @else {
+  <app-nav></app-nav>
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <a class="footer-brand" routerLink="/">
+        <span class="logo-mark">K</span>
+        <span class="logo-text">Kalendar</span>
+      </a>
+      <p class="footer-copy">© 2026 Kalendar. Booking made effortless.</p>
+      <div class="footer-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+  </footer>
+}

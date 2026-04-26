@@ -1,0 +1,123 @@
+:host {
+  display: block;
+}
+
+.page {
+  padding: var(--space-16) 0 var(--space-12);
+}
+
+.page-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+}
+
+.page-title {
+  font-size: clamp(32px, 4.5vw, 48px);
+  letter-spacing: -0.03em;
+}
+
+.page-sub {
+  font-size: 17px;
+  color: var(--color-ink-muted);
+}
+
+.search-bar {
+  position: relative;
+  margin-bottom: var(--space-10);
+
+  input {
+    width: 100%;
+    padding: 16px 20px 16px 52px;
+    font-family: inherit;
+    font-size: 16px;
+    color: var(--color-ink);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &::placeholder {
+      color: var(--color-ink-subtle);
+    }
+
+    &:focus {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(15, 76, 58, 0.12);
+    }
+  }
+}
+
+.search-icon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.state-msg {
+  text-align: center;
+  padding: var(--space-12);
+  color: var(--color-ink-muted);
+  font-size: 15px;
+
+  &.error {
+    background: #fdecea;
+    color: #c0392b;
+    border: 1px solid #f5c5c0;
+    border-radius: var(--radius-md);
+  }
+
+  a {
+    color: var(--color-accent);
+    font-weight: 500;
+    text-decoration: underline;
+  }
+}
+
+.biz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-5);
+}
+
+.biz-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  h3 {
+    font-size: 18px;
+    letter-spacing: -0.01em;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--color-ink-muted);
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .biz-meta {
+    font-size: 12px;
+    color: var(--color-ink-subtle);
+    margin-top: var(--space-2);
+    text-transform: lowercase;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-border-strong);
+  }
+}

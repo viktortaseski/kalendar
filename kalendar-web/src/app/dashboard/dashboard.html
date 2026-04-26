@@ -1,0 +1,49 @@
+<section class="dashboard">
+  <div class="container">
+    <header class="dash-head">
+      <span class="eyebrow"><span class="dot"></span> Dashboard</span>
+      <h1 class="dash-title">
+        Welcome, <em>{{ auth.currentUser()?.fullName }}</em>.
+      </h1>
+      <p class="dash-sub">What would you like to do today?</p>
+    </header>
+
+    <div class="action-grid">
+      <a routerLink="/businesses" class="action-card">
+        <div class="action-icon">🔍</div>
+        <h2>Browse businesses</h2>
+        <p>Find a salon, clinic, or studio and book an appointment online.</p>
+        <span class="action-arrow">→</span>
+      </a>
+
+      <a routerLink="/businesses/new" class="action-card featured">
+        <div class="action-icon">✨</div>
+        <h2>Start your business</h2>
+        <p>Pick a plan, set up your calendar, and start taking online bookings.</p>
+        <span class="action-arrow">→</span>
+      </a>
+    </div>
+
+    @if (myBusinesses().length > 0) {
+      <section class="my-businesses">
+        <header class="section-head-left">
+          <span class="eyebrow"><span class="dot"></span> Your businesses</span>
+          <h2>Manage your businesses</h2>
+        </header>
+        <div class="biz-list">
+          @for (b of myBusinesses(); track b.id) {
+            <a class="biz-row" [routerLink]="['/businesses', b.slug]">
+              <div>
+                <div class="biz-name">{{ b.name }}</div>
+                @if (b.description) {
+                  <div class="biz-desc">{{ b.description }}</div>
+                }
+              </div>
+              <span class="biz-status">{{ b.subscription_status }}</span>
+            </a>
+          }
+        </div>
+      </section>
+    }
+  </div>
+</section>

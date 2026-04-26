@@ -1,0 +1,57 @@
+<aside class="sidebar" [class.open]="open()">
+  <div class="side-brand">
+    <a routerLink="/dashboard" class="brand-link">
+      <span class="logo-mark">K</span>
+      <span class="brand-text">Kalendar</span>
+    </a>
+  </div>
+
+  <nav class="side-nav">
+    <a routerLink="/dashboard" routerLinkActive="active" class="side-link">
+      <span class="side-icon">▦</span>
+      <span>Dashboard</span>
+    </a>
+    <a routerLink="/businesses" routerLinkActive="active" class="side-link">
+      <span class="side-icon">⌕</span>
+      <span>Browse</span>
+    </a>
+    <a routerLink="/my-appointments" routerLinkActive="active" class="side-link">
+      <span class="side-icon">🕰️</span>
+      <span>My appointments</span>
+    </a>
+    <a routerLink="/settings" routerLinkActive="active" class="side-link">
+      <span class="side-icon">⚙</span>
+      <span>Settings</span>
+    </a>
+  </nav>
+
+  <div class="side-section">
+    <div class="side-section-head">
+      <span class="side-section-title">My businesses</span>
+      <a routerLink="/businesses/new" class="side-add" title="Create business">+</a>
+    </div>
+    @if (myBusinesses().length === 0) {
+      <p class="side-empty">No businesses yet</p>
+    } @else {
+      <div class="biz-list">
+        @for (b of myBusinesses(); track b.id) {
+          <a [routerLink]="['/businesses', b.slug, 'manage']" routerLinkActive="active" class="side-link side-biz">
+            <span class="biz-mark">{{ b.name.charAt(0).toUpperCase() }}</span>
+            <span class="biz-link-name">{{ b.name }}</span>
+          </a>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="side-footer">
+    <div class="side-user">
+      <div class="user-avatar">{{ auth.currentUser()?.fullName?.charAt(0)?.toUpperCase() }}</div>
+      <div class="user-meta">
+        <div class="user-name">{{ auth.currentUser()?.fullName }}</div>
+        <div class="user-email">{{ auth.currentUser()?.email }}</div>
+      </div>
+    </div>
+    <button type="button" class="logout-btn" (click)="logout()">Log out</button>
+  </div>
+</aside>

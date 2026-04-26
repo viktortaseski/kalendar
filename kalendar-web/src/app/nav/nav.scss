@@ -112,6 +112,21 @@
   }
 }
 
+.user-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--color-warm);
+  border-radius: var(--radius-pill);
+  color: var(--color-ink);
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (max-width: 860px) {
   .nav-links {
     display: none;
@@ -123,7 +138,8 @@
 }
 
 @media (max-width: 480px) {
-  .link-btn {
+  .link-btn,
+  .user-pill {
     display: none;
   }
 }
