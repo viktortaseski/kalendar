@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "node --watch --env-file=.env src/index.js",
     "build": "echo 'No build step required for plain JS'",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "migrate": "node --env-file=.env migrations.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

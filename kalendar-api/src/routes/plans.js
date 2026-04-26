@@ -1,9 +1,12 @@
 import { Router } from 'express';
+import { db } from '../dbConn';
 
 const plans = Router();
 
 plans.get('/', (req, res) => {
-  res.send(req, "Hello from plans")
+  db.query("SELECT * FROM plans")
+    .then(result => res.json(result.rows))
+    .catch(err => res.status(500).json({ error: err.message }));
 });
 
 export default plans;
