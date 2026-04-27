@@ -163,6 +163,52 @@
 
         <section class="card-block">
           <header class="block-head">
+            <h2>Invite teammate</h2>
+            <p>Send a Kalendar invite. They'll see it in their inbox and can accept to manage their own schedule.</p>
+          </header>
+
+          @if (invites().length === 0) {
+            <div class="empty-row">No invites yet.</div>
+          } @else {
+            <ul class="row-list">
+              @for (i of invites(); track i.id) {
+                <li class="row">
+                  <div class="row-main">
+                    <div class="row-name">{{ i.invitee_full_name }}</div>
+                    <div class="row-desc">{{ i.email }}</div>
+                  </div>
+                  <div class="row-meta">
+                    <span class="appt-status {{ 'status-' + i.status }}">{{ i.status }}</span>
+                  </div>
+                  @if (i.status === 'pending') {
+                    <button class="row-delete" type="button" (click)="revokeInvite(i.id)">Revoke</button>
+                  }
+                </li>
+              }
+            </ul>
+          }
+
+          <form class="inline-form" [formGroup]="inviteForm" (ngSubmit)="sendInvite()" novalidate>
+            <div class="grid-2">
+              <input type="email" formControlName="email" placeholder="teammate@example.com" />
+              <input type="text" formControlName="name" placeholder="Display name (optional)" />
+            </div>
+            <div class="hours-actions">
+              <button type="submit" class="btn-add" [disabled]="inviteSending()">
+                {{ inviteSending() ? 'Sending…' : '+ Send invite' }}
+              </button>
+              @if (inviteSent()) {
+                <span class="saved-msg">Invite sent ✓</span>
+              }
+            </div>
+          </form>
+          @if (inviteError()) {
+            <div class="form-error">{{ inviteError() }}</div>
+          }
+        </section>
+
+        <section class="card-block">
+          <header class="block-head">
             <h2>Working hours</h2>
             @if (selectedEmployee(); as emp) {
               <p>Weekly schedule for <strong>{{ emp.name }}</strong>.</p>

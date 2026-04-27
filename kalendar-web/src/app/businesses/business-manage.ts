@@ -73,6 +73,24 @@ export class BusinessManage implements OnInit {
     email: [''],
   });
 
+  // ─── Invites ─────────────────────────────────────────────
+  invites = signal<{
+    id: number;
+    email: string;
+    name: string | null;
+    status: string;
+    created_at: string;
+    responded_at: string | null;
+    invitee_full_name: string;
+  }[]>([]);
+  inviteError = signal<string | null>(null);
+  inviteSent = signal(false);
+  inviteSending = signal(false);
+  inviteForm = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
+    name: [''],
+  });
+
   // ─── Working hours ───────────────────────────────────────
   selectedEmployeeId = signal<number | null>(null);
   daysGrid = signal<DayRow[]>(this.emptyGrid());
@@ -151,6 +169,7 @@ export class BusinessManage implements OnInit {
             this.loadAppointments();
             this.refreshServices();
             this.refreshEmployees();
+            this.refreshInvites();
             this.loadPlans(b.plan_type);
             this.generateQr();
           },
@@ -169,6 +188,9 @@ export class BusinessManage implements OnInit {
     this.appointments.set([]);
     this.services.set([]);
     this.employees.set([]);
+    this.invites.set([]);
+    this.inviteError.set(null);
+    this.inviteSent.set(false);
     this.selectedEmployeeId.set(null);
     this.daysGrid.set(this.emptyGrid());
     this.plans.set([]);
@@ -275,6 +297,47 @@ export class BusinessManage implements OnInit {
         },
         error: (err) => this.employeeError.set(err?.error?.error || 'Failed to add employee'),
       });
+  }
+
+  // ─── Invites ─────────────────────────────────────────────
+  refreshInvites() {
+    this.api.listInvites(this.slug).subscribe({
+      next: (rows) => this.invites.set(rows),
+      error: () => this.invites.set([]),
+    });
+  }
+
+  sendInvite() {
+    this.inviteError.set(null);
+    this.inviteSent.set(false);
+    if (this.inviteForm.invalid) {
+      this.inviteForm.markAllAsTouched();
+      return;
+    }
+    const v = this.inviteForm.getRawValue();
+    this.inviteSending.set(true);
+    this.api
+      .createInvite(this.slug, { email: v.email.trim(), name: v.name?.trim() || undefined })
+      .subscribe({
+        next: () => {
+          this.inviteSending.set(false);
+          this.inviteSent.set(true);
+          this.inviteForm.reset({ email: '', name: '' });
+          this.refreshInvites();
+        },
+        error: (err) => {
+          this.inviteSending.set(false);
+          this.inviteError.set(err?.error?.error || 'Failed to send invite');
+        },
+      });
+  }
+
+  revokeInvite(id: number) {
+    if (!confirm('Revoke this invite?')) return;
+    this.api.revokeInvite(this.slug, id).subscribe({
+      next: () => this.invites.update((rows) => rows.filter((r) => r.id !== id)),
+      error: (err) => this.inviteError.set(err?.error?.error || 'Failed to revoke invite'),
+    });
   }
 
   removeEmployee(e: Employee) {

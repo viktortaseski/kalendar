@@ -1,0 +1,67 @@
+<section class="page">
+  <div class="container">
+    <header class="page-head">
+      <span class="eyebrow"><span class="dot"></span> Inbox</span>
+      <h1 class="page-title">Notifications</h1>
+      <p class="page-sub">Invites and updates from businesses you work with.</p>
+    </header>
+
+    @if (loading()) {
+      <div class="state-msg">Loading…</div>
+    } @else if (pageError()) {
+      <div class="state-msg error">{{ pageError() }}</div>
+    } @else {
+      @if (hasUnread()) {
+        <div class="actions-bar">
+          <button type="button" class="btn-ghost" (click)="markAllRead()">Mark all read</button>
+        </div>
+      }
+
+      @if (actionError()) {
+        <div class="form-error">{{ actionError() }}</div>
+      }
+
+      @if (notifications().length === 0) {
+        <div class="empty-row">No notifications yet.</div>
+      } @else {
+        <ul class="notif-list">
+          @for (n of notifications(); track n.id) {
+            <li class="notif" [class.unread]="!n.read_at" (click)="markRead(n)">
+              <div class="notif-icon" [class.icon-invite]="n.type === 'employee_invite'">
+                @switch (n.type) {
+                  @case ('employee_invite') { ✉ }
+                  @default { • }
+                }
+              </div>
+              <div class="notif-main">
+                <div class="notif-title">{{ n.title }}</div>
+                @if (n.body) {
+                  <div class="notif-body">{{ n.body }}</div>
+                }
+                <div class="notif-time">{{ n.created_at | date:'MMM d, y h:mm a' }}</div>
+
+                @if (n.type === 'employee_invite' && isPending(n)) {
+                  <div class="invite-actions">
+                    <button type="button" class="btn-save" [disabled]="actingId() === n.id"
+                            (click)="$event.stopPropagation(); acceptInvite(n)">
+                      {{ actingId() === n.id ? 'Working…' : 'Accept' }}
+                    </button>
+                    <button type="button" class="btn-secondary" [disabled]="actingId() === n.id"
+                            (click)="$event.stopPropagation(); declineInvite(n)">
+                      Decline
+                    </button>
+                  </div>
+                } @else if (n.type === 'employee_invite' && !isPending(n)) {
+                  <div class="invite-resolved">No longer pending.</div>
+                }
+              </div>
+              @if (!n.read_at) {
+                <span class="unread-dot" aria-label="Unread"></span>
+              }
+            </li>
+          }
+        </ul>
+      }
+    }
+  </div>
+</section>

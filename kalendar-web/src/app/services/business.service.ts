@@ -211,6 +211,35 @@ export class BusinessService {
     );
   }
 
+  // Employee invites (owner)
+  listInvites(slug: string) {
+    return this.http.get<{
+      id: number;
+      email: string;
+      name: string | null;
+      status: string;
+      created_at: string;
+      responded_at: string | null;
+      invitee_full_name: string;
+    }[]>(`${this.base}/${slug}/invites`);
+  }
+
+  createInvite(slug: string, payload: { email: string; name?: string }) {
+    return this.http.post<{
+      id: number;
+      business_id: number;
+      user_id: number;
+      email: string;
+      name: string | null;
+      status: string;
+      created_at: string;
+    }>(`${this.base}/${slug}/invites`, payload);
+  }
+
+  revokeInvite(slug: string, id: number) {
+    return this.http.delete<void>(`${this.base}/${slug}/invites/${id}`);
+  }
+
   // Unavailability (employee-self or owner)
   listUnavailability(slug: string, employeeId: number): Observable<UnavailabilityBlock[]> {
     return this.http.get<UnavailabilityBlock[]>(

@@ -2,6 +2,7 @@ import { Component, OnInit, inject, input, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { BusinessService, MyBusiness, MyJob } from '../services/business.service';
+import { NotificationsService } from '../services/notifications.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -13,6 +14,7 @@ export class Sidebar implements OnInit {
   private router = inject(Router);
   private bizService = inject(BusinessService);
   protected auth = inject(AuthService);
+  protected notifications = inject(NotificationsService);
 
   open = input<boolean>(false);
   myBusinesses = signal<MyBusiness[]>([]);
@@ -31,6 +33,7 @@ export class Sidebar implements OnInit {
       next: (rows) => this.myJobs.set(rows),
       error: () => this.myJobs.set([]),
     });
+    this.notifications.refreshUnreadCount().subscribe({ error: () => {} });
   }
 
   logout() {

@@ -214,6 +214,10 @@
   &.status-completed { background: var(--color-neutral-bg); color: var(--color-neutral); }
   &.status-canceled  { background: var(--color-danger-bg);  color: var(--color-danger); }
   &.status-no_show   { background: var(--color-warn-bg);    color: var(--color-warn); }
+  &.status-pending   { background: var(--color-info-bg);    color: var(--color-info); }
+  &.status-accepted  { background: var(--color-success-bg); color: var(--color-success); }
+  &.status-declined  { background: var(--color-danger-bg);  color: var(--color-danger); }
+  &.status-revoked   { background: var(--color-neutral-bg); color: var(--color-neutral); }
 }
 
 /* ─── Settings ───────────────────────────────────────── */

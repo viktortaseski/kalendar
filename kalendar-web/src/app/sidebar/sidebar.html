@@ -19,6 +19,13 @@
       <span class="side-icon">▤</span>
       <span>My appointments</span>
     </a>
+    <a routerLink="/inbox" routerLinkActive="active" class="side-link">
+      <span class="side-icon">✉</span>
+      <span>Inbox</span>
+      @if (notifications.unreadCount() > 0) {
+        <span class="side-badge">{{ notifications.unreadCount() }}</span>
+      }
+    </a>
     <a routerLink="/settings" routerLinkActive="active" class="side-link">
       <span class="side-icon">⚙</span>
       <span>Settings</span>

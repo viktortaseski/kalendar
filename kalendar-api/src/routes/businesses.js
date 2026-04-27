@@ -669,6 +669,148 @@ businesses.put('/:slug/plan', requireAuth, async (req, res) => {
   }
 });
 
+// ─── Employee invites (owner side) ─────────────────────────
+
+// POST /:slug/invites — body: { email, name? }
+businesses.post('/:slug/invites', requireAuth, async (req, res) => {
+  try {
+    const r = await loadBySlug(req.params.slug, true, req.user.sub);
+    if (r.error) return res.status(r.status).json({ error: r.error });
+
+    const { email, name } = req.body || {};
+    const trimmedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+    if (!trimmedEmail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(trimmedEmail)) {
+      return res.status(400).json({ error: 'Valid email is required' });
+    }
+
+    const userRes = await db.query(
+      'SELECT id, full_name FROM users WHERE LOWER(email) = $1',
+      [trimmedEmail]
+    );
+    if (userRes.rowCount === 0) {
+      return res.status(404).json({ error: 'No Kalendar account uses that email yet. Ask them to register first.' });
+    }
+    const invitee = userRes.rows[0];
+
+    if (invitee.id === req.user.sub) {
+      return res.status(400).json({ error: 'You cannot invite yourself' });
+    }
+
+    const dup = await db.query(
+      `SELECT id FROM employee_invites
+       WHERE business_id = $1 AND user_id = $2 AND status = 'pending'`,
+      [r.business.id, invitee.id]
+    );
+    if (dup.rowCount > 0) {
+      return res.status(409).json({ error: 'A pending invite already exists for this user' });
+    }
+
+    const bizNameRes = await db.query('SELECT name, slug FROM businesses WHERE id = $1', [r.business.id]);
+    const bizName = bizNameRes.rows[0].name;
+    const bizSlug = bizNameRes.rows[0].slug;
+
+    const client = await db.connect();
+    try {
+      await client.query('BEGIN');
+      const inv = await client.query(
+        `INSERT INTO employee_invites (business_id, user_id, email, name, invited_by)
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id, business_id, user_id, email, name, status, created_at`,
+        [r.business.id, invitee.id, trimmedEmail, (name || invitee.full_name || null), req.user.sub]
+      );
+      await client.query(
+        `INSERT INTO notifications (user_id, type, title, body, payload)
+         VALUES ($1, 'employee_invite', $2, $3, $4)`,
+        [
+          invitee.id,
+          `${bizName} invited you to join their team`,
+          'Open your inbox to accept or decline.',
+          JSON.stringify({
+            invite_id: inv.rows[0].id,
+            business_id: r.business.id,
+            business_slug: bizSlug,
+            business_name: bizName,
+          }),
+        ]
+      );
+      await client.query('COMMIT');
+      res.status(201).json(inv.rows[0]);
+    } catch (e) {
+      await client.query('ROLLBACK').catch(() => {});
+      throw e;
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error('POST invite failed:', err);
+    res.status(500).json({ error: err.message || 'Failed to send invite' });
+  }
+});
+
+// GET /:slug/invites — owner only, all invites for this business
+businesses.get('/:slug/invites', requireAuth, async (req, res) => {
+  try {
+    const r = await loadBySlug(req.params.slug, true, req.user.sub);
+    if (r.error) return res.status(r.status).json({ error: r.error });
+
+    const result = await db.query(
+      `SELECT i.id, i.email, i.name, i.status, i.created_at, i.responded_at,
+              u.full_name AS invitee_full_name
+       FROM employee_invites i
+       JOIN users u ON u.id = i.user_id
+       WHERE i.business_id = $1
+       ORDER BY (i.status = 'pending') DESC, i.created_at DESC`,
+      [r.business.id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('GET invites failed:', err);
+    res.status(500).json({ error: err.message || 'Failed to load invites' });
+  }
+});
+
+// DELETE /:slug/invites/:id — owner revokes a pending invite
+businesses.delete('/:slug/invites/:id', requireAuth, async (req, res) => {
+  const client = await db.connect();
+  try {
+    const r = await loadBySlug(req.params.slug, true, req.user.sub);
+    if (r.error) {
+      client.release();
+      return res.status(r.status).json({ error: r.error });
+    }
+
+    await client.query('BEGIN');
+    const upd = await client.query(
+      `UPDATE employee_invites
+       SET status = 'revoked', responded_at = NOW()
+       WHERE id = $1 AND business_id = $2 AND status = 'pending'
+       RETURNING id, user_id`,
+      [req.params.id, r.business.id]
+    );
+    if (upd.rowCount === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Pending invite not found' });
+    }
+    // Remove the unread notification for this invite, if any
+    await client.query(
+      `DELETE FROM notifications
+       WHERE user_id = $1
+         AND type = 'employee_invite'
+         AND read_at IS NULL
+         AND (payload->>'invite_id')::int = $2`,
+      [upd.rows[0].user_id, upd.rows[0].id]
+    );
+    await client.query('COMMIT');
+    res.status(204).end();
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('DELETE invite failed:', err);
+    res.status(500).json({ error: err.message || 'Failed to revoke invite' });
+  } finally {
+    client.release();
+  }
+});
+
 // ─── Unavailability (per employee) ─────────────────────────
 // Owner OR the employee themselves can read/write.
 
