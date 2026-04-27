@@ -521,6 +521,100 @@
   &.invalid { border-color: #c0392b; }
 }
 
+/* ─── QR code ───────────────────────────────────────────────── */
+.qr-block {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-5);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.qr-image {
+  width: 200px;
+  height: 200px;
+  border-radius: var(--radius-md);
+  background: white;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.qr-placeholder {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--color-ink-muted);
+  background: var(--color-bg-elevated);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.qr-info {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.qr-url-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-ink-muted);
+  font-weight: 600;
+}
+
+.qr-url {
+  font-size: 14px;
+  color: var(--color-ink);
+  word-break: break-all;
+  text-decoration: underline;
+  text-decoration-color: var(--color-border-strong);
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+
+  &:hover {
+    color: var(--color-accent);
+    text-decoration-color: var(--color-accent);
+  }
+}
+
+.qr-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.btn-secondary {
+  padding: 11px 22px;
+  background: transparent;
+  color: var(--color-ink);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 500;
+  transition: border-color 0.15s ease, background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-ink);
+    background: var(--color-bg-elevated);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 /* ─── Plans ─────────────────────────────────────────────────── */
 .plan-cards {
   display: grid;

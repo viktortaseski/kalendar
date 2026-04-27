@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import * as QRCode from 'qrcode';
 import {
   BusinessService,
   BusinessDetail as BusinessDetailModel,
@@ -12,6 +13,7 @@ import {
 } from '../services/business.service';
 import { AuthService } from '../services/auth.service';
 import { PlanService, Plan } from '../services/plan.service';
+import { environment } from '../../environments/environment';
 
 type Tab = 'appointments' | 'staff' | 'settings' | 'plans' | 'billing';
 
@@ -89,6 +91,19 @@ export class BusinessManage implements OnInit {
   settingsSaved = signal(false);
   settingsError = signal<string | null>(null);
 
+  // ─── QR code ─────────────────────────────────────────────
+  qrDataUrl = signal<string | null>(null);
+  qrError = signal<string | null>(null);
+
+  publicUrl = computed(() => {
+    const b = this.business();
+    if (!b) return '';
+    const domain = environment.publicDomain;
+    return domain
+      ? `http://${b.slug}.${domain}`
+      : `${typeof window !== 'undefined' ? window.location.origin : ''}/businesses/${b.slug}`;
+  });
+
   // ─── Plans ───────────────────────────────────────────────
   plans = signal<Plan[]>([]);
   selectedPlanId = signal<number | null>(null);
@@ -129,6 +144,7 @@ export class BusinessManage implements OnInit {
         this.refreshServices();
         this.refreshEmployees();
         this.loadPlans(b.plan_type);
+        this.generateQr();
       },
       error: () => {
         this.pageError.set('Could not load business');
@@ -375,6 +391,41 @@ export class BusinessManage implements OnInit {
         this.planSaving.set(false);
       },
     });
+  }
+
+  // ─── QR code ─────────────────────────────────────────────
+  private async generateQr() {
+    const url = this.publicUrl();
+    if (!url) return;
+    try {
+      const dataUrl = await QRCode.toDataURL(url, {
+        width: 320,
+        margin: 1,
+        color: { dark: '#0F4C3A', light: '#FFFFFF' },
+      });
+      this.qrDataUrl.set(dataUrl);
+      this.qrError.set(null);
+    } catch (e: any) {
+      this.qrError.set(e?.message || 'Failed to generate QR code');
+    }
+  }
+
+  downloadQr() {
+    const data = this.qrDataUrl();
+    const b = this.business();
+    if (!data || !b) return;
+    const a = document.createElement('a');
+    a.href = data;
+    a.download = `${b.slug}-qr.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  copyPublicUrl() {
+    const url = this.publicUrl();
+    if (!url || typeof navigator === 'undefined' || !navigator.clipboard) return;
+    navigator.clipboard.writeText(url);
   }
 
   // ─── Helpers ─────────────────────────────────────────────

@@ -259,6 +259,39 @@
             </div>
           </form>
         </section>
+
+        <section class="card-block">
+          <header class="block-head">
+            <h2>Booking QR code</h2>
+            <p>Print or share this QR code so customers can open your booking page instantly.</p>
+          </header>
+
+          <div class="qr-block">
+            @if (qrDataUrl(); as src) {
+              <img class="qr-image" [src]="src" alt="QR code for {{ b.name }}" />
+            } @else if (qrError()) {
+              <div class="form-error">{{ qrError() }}</div>
+            } @else {
+              <div class="qr-placeholder">Generating…</div>
+            }
+
+            <div class="qr-info">
+              <div class="qr-url-label">Points to</div>
+              <a class="qr-url" [href]="publicUrl()" target="_blank" rel="noopener">
+                {{ publicUrl() }}
+              </a>
+
+              <div class="qr-actions">
+                <button type="button" class="btn-save" (click)="downloadQr()" [disabled]="!qrDataUrl()">
+                  Download PNG
+                </button>
+                <button type="button" class="btn-secondary" (click)="copyPublicUrl()">
+                  Copy link
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
       }
 
       <!-- ─── PLANS ─────────────────────────────────────────── -->
