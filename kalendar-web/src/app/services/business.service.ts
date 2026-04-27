@@ -240,6 +240,13 @@ export class BusinessService {
     return this.http.delete<void>(`${this.base}/${slug}/invites/${id}`);
   }
 
+  // Employee's own appointments (owner-or-self)
+  getEmployeeAppointments(slug: string, employeeId: number): Observable<BusinessAppointment[]> {
+    return this.http.get<BusinessAppointment[]>(
+      `${this.base}/${slug}/employees/${employeeId}/appointments`,
+    );
+  }
+
   // Unavailability (employee-self or owner)
   listUnavailability(slug: string, employeeId: number): Observable<UnavailabilityBlock[]> {
     return this.http.get<UnavailabilityBlock[]>(

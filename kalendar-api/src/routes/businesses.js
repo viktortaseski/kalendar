@@ -814,6 +814,30 @@ businesses.delete('/:slug/invites/:id', requireAuth, async (req, res) => {
 // ─── Unavailability (per employee) ─────────────────────────
 // Owner OR the employee themselves can read/write.
 
+// GET /:slug/employees/:id/appointments — owner OR the employee themselves
+businesses.get('/:slug/employees/:id/appointments', requireAuth, async (req, res) => {
+  try {
+    const r = await loadEmployeeForSelf(req.params.slug, req.params.id, req.user);
+    if (r.error) return res.status(r.status).json({ error: r.error });
+
+    const result = await db.query(
+      `SELECT a.id, a.customer_name, a.customer_email, a.customer_phone,
+              a.starts_at, a.ends_at, a.status, a.notes,
+              e.name AS employee_name, s.name AS service_name
+       FROM appointments a
+       LEFT JOIN employees e ON e.id = a.employee_id
+       LEFT JOIN services  s ON s.id = a.service_id
+       WHERE a.employee_id = $1
+       ORDER BY a.starts_at ASC`,
+      [r.employee.id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('GET employee appointments failed:', err);
+    res.status(500).json({ error: err.message || 'Failed to fetch appointments' });
+  }
+});
+
 // GET /:slug/employees/:id/unavailability
 businesses.get('/:slug/employees/:id/unavailability', requireAuth, async (req, res) => {
   try {

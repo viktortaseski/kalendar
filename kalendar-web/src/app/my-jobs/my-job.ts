@@ -4,6 +4,7 @@ import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
+  BusinessAppointment,
   BusinessService,
   MyJob as MyJobModel,
   UnavailabilityBlock,
@@ -37,6 +38,22 @@ export class MyJob implements OnInit {
   job = signal<MyJobModel | null>(null);
   loading = signal(true);
   pageError = signal<string | null>(null);
+
+  appointments = signal<BusinessAppointment[]>([]);
+  appointmentsError = signal<string | null>(null);
+  appointmentsLoading = signal(false);
+  showPast = signal(false);
+
+  upcomingAppointments = computed(() => {
+    const now = Date.now();
+    return this.appointments().filter((a) => new Date(a.starts_at).getTime() >= now);
+  });
+  pastAppointments = computed(() => {
+    const now = Date.now();
+    return this.appointments()
+      .filter((a) => new Date(a.starts_at).getTime() < now)
+      .reverse();
+  });
 
   daysGrid = signal<DayRow[]>(this.emptyGrid());
   hoursError = signal<string | null>(null);
@@ -76,6 +93,9 @@ export class MyJob implements OnInit {
     this.job.set(null);
     this.daysGrid.set(this.emptyGrid());
     this.unavailability.set([]);
+    this.appointments.set([]);
+    this.appointmentsError.set(null);
+    this.showPast.set(false);
     this.hoursError.set(null);
     this.hoursSaved.set(false);
     this.unavailError.set(null);
@@ -92,6 +112,7 @@ export class MyJob implements OnInit {
         }
         this.job.set(match);
         this.loading.set(false);
+        this.loadAppointments(match.employee_id);
         this.loadHours(match.employee_id);
         this.loadUnavailability(match.employee_id);
       },
@@ -100,6 +121,26 @@ export class MyJob implements OnInit {
         this.loading.set(false);
       },
     });
+  }
+
+  // ─── Appointments ────────────────────────────────────────
+  private loadAppointments(employeeId: number) {
+    this.appointmentsLoading.set(true);
+    this.appointmentsError.set(null);
+    this.api.getEmployeeAppointments(this.slug, employeeId).subscribe({
+      next: (rows) => {
+        this.appointments.set(rows);
+        this.appointmentsLoading.set(false);
+      },
+      error: (err) => {
+        this.appointmentsError.set(err?.error?.error || 'Failed to load appointments');
+        this.appointmentsLoading.set(false);
+      },
+    });
+  }
+
+  togglePast() {
+    this.showPast.update((v) => !v);
   }
 
   // ─── Working hours ───────────────────────────────────────

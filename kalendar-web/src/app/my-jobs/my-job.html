@@ -13,6 +13,80 @@
         <p class="page-sub">You're listed as <strong>{{ j.employee_name }}</strong>. Set your own schedule and time off here.</p>
       </header>
 
+      <!-- ─── APPOINTMENTS ────────────────────────────────── -->
+      <section class="card-block">
+        <header class="block-head">
+          <h2>Your appointments</h2>
+          <p>Bookings customers have made with you at {{ j.business_name }}.</p>
+        </header>
+
+        @if (appointmentsLoading()) {
+          <div class="empty-row">Loading…</div>
+        } @else if (appointmentsError()) {
+          <div class="form-error">{{ appointmentsError() }}</div>
+        } @else if (upcomingAppointments().length === 0 && pastAppointments().length === 0) {
+          <div class="empty-row">No appointments yet.</div>
+        } @else {
+          @if (upcomingAppointments().length === 0) {
+            <div class="empty-row">No upcoming appointments.</div>
+          } @else {
+            <ul class="appt-list">
+              @for (a of upcomingAppointments(); track a.id) {
+                <li class="appt-row">
+                  <div class="appt-main">
+                    <div class="appt-customer">{{ a.customer_name }}</div>
+                    <div class="appt-meta">{{ a.customer_email }}</div>
+                    @if (a.customer_phone) {
+                      <div class="appt-meta">{{ a.customer_phone }}</div>
+                    }
+                    @if (a.service_name) {
+                      <div class="appt-meta">Service: {{ a.service_name }}</div>
+                    }
+                    @if (a.notes) {
+                      <div class="appt-notes">{{ a.notes }}</div>
+                    }
+                  </div>
+                  <div class="appt-right">
+                    <div class="appt-date">{{ a.starts_at | date:'MMM d, y' }}</div>
+                    <div class="appt-time">{{ a.starts_at | date:'h:mm a' }}</div>
+                    <span class="appt-status {{ 'status-' + a.status }}">{{ a.status }}</span>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+
+          @if (pastAppointments().length > 0) {
+            <div class="past-toggle-row">
+              <button type="button" class="btn-ghost-sm" (click)="togglePast()">
+                {{ showPast() ? 'Hide past' : 'Show past (' + pastAppointments().length + ')' }}
+              </button>
+            </div>
+
+            @if (showPast()) {
+              <ul class="appt-list past">
+                @for (a of pastAppointments(); track a.id) {
+                  <li class="appt-row">
+                    <div class="appt-main">
+                      <div class="appt-customer">{{ a.customer_name }}</div>
+                      <div class="appt-meta">{{ a.customer_email }}</div>
+                      @if (a.service_name) {
+                        <div class="appt-meta">Service: {{ a.service_name }}</div>
+                      }
+                    </div>
+                    <div class="appt-right">
+                      <div class="appt-date">{{ a.starts_at | date:'MMM d, y' }}</div>
+                      <div class="appt-time">{{ a.starts_at | date:'h:mm a' }}</div>
+                      <span class="appt-status {{ 'status-' + a.status }}">{{ a.status }}</span>
+                    </div>
+                  </li>
+                }
+              </ul>
+            }
+          }
+        }
+      </section>
+
       <!-- ─── WORKING HOURS ───────────────────────────────── -->
       <section class="card-block">
         <header class="block-head">

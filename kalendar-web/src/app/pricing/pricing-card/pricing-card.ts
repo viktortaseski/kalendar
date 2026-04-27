@@ -1,4 +1,5 @@
 import { Component, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 export type Plan = {
   type: string;
@@ -11,7 +12,7 @@ export type Plan = {
 
 @Component({
   selector: 'app-pricing-card',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './pricing-card.html',
   styleUrl: './pricing-card.scss',
 })
