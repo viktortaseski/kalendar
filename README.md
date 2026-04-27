@@ -25,6 +25,7 @@ npm run dev        # starts on http://localhost:3000
 ```
 
 Available endpoints:
+
 - `GET  /api/health` — health check
 - `GET  /api/plans` — list pricing plans
 - `POST /api/bookings` — create a booking (body: `{ "name": "...", "slot": "..." }`)

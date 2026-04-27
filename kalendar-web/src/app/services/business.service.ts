@@ -36,6 +36,22 @@ export interface MyBusiness extends BusinessSummary {
   subscription_status: string;
 }
 
+export interface MyJob {
+  business_id: number;
+  business_slug: string;
+  business_name: string;
+  business_timezone: string;
+  employee_id: number;
+  employee_name: string;
+}
+
+export interface UnavailabilityBlock {
+  id: number;
+  starts_at: string;
+  ends_at: string;
+  reason: string | null;
+}
+
 export interface Service {
   id: number;
   name: string;
@@ -95,6 +111,10 @@ export class BusinessService {
 
   mine(): Observable<MyBusiness[]> {
     return this.http.get<MyBusiness[]>(`${this.base}/mine/list`);
+  }
+
+  myJobs(): Observable<MyJob[]> {
+    return this.http.get<MyJob[]>(`${this.base}/jobs/list`);
   }
 
   // Services
@@ -188,6 +208,28 @@ export class BusinessService {
     return this.http.put<WorkingHourRow[]>(
       `${this.base}/${slug}/employees/${employeeId}/working-hours`,
       { hours },
+    );
+  }
+
+  // Unavailability (employee-self or owner)
+  listUnavailability(slug: string, employeeId: number): Observable<UnavailabilityBlock[]> {
+    return this.http.get<UnavailabilityBlock[]>(
+      `${this.base}/${slug}/employees/${employeeId}/unavailability`,
+    );
+  }
+  createUnavailability(
+    slug: string,
+    employeeId: number,
+    payload: { startsAt: string; endsAt: string; reason?: string },
+  ): Observable<UnavailabilityBlock> {
+    return this.http.post<UnavailabilityBlock>(
+      `${this.base}/${slug}/employees/${employeeId}/unavailability`,
+      payload,
+    );
+  }
+  deleteUnavailability(slug: string, employeeId: number, id: number) {
+    return this.http.delete<void>(
+      `${this.base}/${slug}/employees/${employeeId}/unavailability/${id}`,
     );
   }
 }

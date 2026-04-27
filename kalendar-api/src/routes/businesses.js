@@ -53,6 +53,34 @@ async function loadBySlug(slug, requireOwner = false, userId = null) {
   return { business: biz };
 }
 
+// Resolve (slug, employeeId) when requester is the owner OR the employee themselves
+// (matched by employees.user_id or employees.email = req.user.email).
+async function loadEmployeeForSelf(slug, employeeId, user) {
+  const bizRes = await db.query(
+    'SELECT id, owner_id FROM businesses WHERE slug = $1 AND active = true',
+    [slug]
+  );
+  if (bizRes.rowCount === 0) return { error: 'Business not found', status: 404 };
+  const business = bizRes.rows[0];
+
+  const empRes = await db.query(
+    'SELECT id, user_id, email FROM employees WHERE id = $1 AND business_id = $2',
+    [employeeId, business.id]
+  );
+  if (empRes.rowCount === 0) return { error: 'Employee not found', status: 404 };
+  const employee = empRes.rows[0];
+
+  const isOwner    = business.owner_id === user.sub;
+  const isLinked   = employee.user_id === user.sub;
+  const emailMatch = employee.email && user.email &&
+                     employee.email.toLowerCase() === user.email.toLowerCase();
+
+  if (!isOwner && !isLinked && !emailMatch) {
+    return { error: 'You do not have access to this employee', status: 403 };
+  }
+  return { business, employee };
+}
+
 // ─── Businesses ────────────────────────────────────────────
 
 // GET /api/businesses?q=
@@ -92,6 +120,31 @@ businesses.get('/mine/list', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('GET /api/businesses/mine/list failed:', err);
     res.status(500).json({ error: err.message || 'Failed to load your businesses' });
+  }
+});
+
+// GET /api/businesses/jobs/list — businesses where the current user is an employee
+businesses.get('/jobs/list', requireAuth, async (req, res) => {
+  try {
+    const result = await db.query(
+      `SELECT b.id          AS business_id,
+              b.slug        AS business_slug,
+              b.name        AS business_name,
+              b.timezone    AS business_timezone,
+              e.id          AS employee_id,
+              e.name        AS employee_name
+       FROM employees e
+       JOIN businesses b ON b.id = e.business_id
+       WHERE b.active = true
+         AND e.active = true
+         AND (e.user_id = $1 OR (e.email IS NOT NULL AND LOWER(e.email) = LOWER($2)))
+       ORDER BY b.name ASC`,
+      [req.user.sub, req.user.email]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('GET /api/businesses/jobs/list failed:', err);
+    res.status(500).json({ error: err.message || 'Failed to load your jobs' });
   }
 });
 
@@ -332,22 +385,14 @@ businesses.get('/:slug/employees/:id/working-hours', async (req, res) => {
 
 // PUT /:slug/employees/:id/working-hours — replace whole schedule
 // Body: { hours: [{ dayOfWeek: 0-6, startTime: 'HH:MM', endTime: 'HH:MM' }, ...] }
+// Allowed for the business owner OR the employee themselves.
 businesses.put('/:slug/employees/:id/working-hours', requireAuth, async (req, res) => {
   const client = await db.connect();
   try {
-    const r = await loadBySlug(req.params.slug, true, req.user.sub);
+    const r = await loadEmployeeForSelf(req.params.slug, req.params.id, req.user);
     if (r.error) {
       client.release();
       return res.status(r.status).json({ error: r.error });
-    }
-
-    const empCheck = await client.query(
-      'SELECT id FROM employees WHERE id = $1 AND business_id = $2',
-      [req.params.id, r.business.id]
-    );
-    if (empCheck.rowCount === 0) {
-      client.release();
-      return res.status(404).json({ error: 'Employee not found' });
     }
 
     const hours = Array.isArray(req.body?.hours) ? req.body.hours : [];
@@ -621,6 +666,80 @@ businesses.put('/:slug/plan', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('PUT business plan failed:', err);
     res.status(500).json({ error: err.message || 'Failed to update plan' });
+  }
+});
+
+// ─── Unavailability (per employee) ─────────────────────────
+// Owner OR the employee themselves can read/write.
+
+// GET /:slug/employees/:id/unavailability
+businesses.get('/:slug/employees/:id/unavailability', requireAuth, async (req, res) => {
+  try {
+    const r = await loadEmployeeForSelf(req.params.slug, req.params.id, req.user);
+    if (r.error) return res.status(r.status).json({ error: r.error });
+
+    const result = await db.query(
+      `SELECT id, starts_at, ends_at, reason
+       FROM unavailability
+       WHERE employee_id = $1
+       ORDER BY starts_at DESC`,
+      [r.employee.id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('GET unavailability failed:', err);
+    res.status(500).json({ error: err.message || 'Failed to fetch unavailability' });
+  }
+});
+
+// POST /:slug/employees/:id/unavailability
+// Body: { startsAt: ISO, endsAt: ISO, reason?: string }
+businesses.post('/:slug/employees/:id/unavailability', requireAuth, async (req, res) => {
+  try {
+    const r = await loadEmployeeForSelf(req.params.slug, req.params.id, req.user);
+    if (r.error) return res.status(r.status).json({ error: r.error });
+
+    const { startsAt, endsAt, reason } = req.body || {};
+    if (!startsAt || !endsAt) {
+      return res.status(400).json({ error: 'startsAt and endsAt are required' });
+    }
+    const start = new Date(startsAt);
+    const end   = new Date(endsAt);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return res.status(400).json({ error: 'startsAt/endsAt must be valid ISO timestamps' });
+    }
+    if (end <= start) {
+      return res.status(400).json({ error: 'endsAt must be after startsAt' });
+    }
+
+    const insert = await db.query(
+      `INSERT INTO unavailability (employee_id, starts_at, ends_at, reason)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, starts_at, ends_at, reason`,
+      [r.employee.id, start.toISOString(), end.toISOString(), reason || null]
+    );
+    res.status(201).json(insert.rows[0]);
+  } catch (err) {
+    console.error('POST unavailability failed:', err);
+    res.status(500).json({ error: err.message || 'Failed to add unavailability' });
+  }
+});
+
+// DELETE /:slug/employees/:id/unavailability/:uid
+businesses.delete('/:slug/employees/:id/unavailability/:uid', requireAuth, async (req, res) => {
+  try {
+    const r = await loadEmployeeForSelf(req.params.slug, req.params.id, req.user);
+    if (r.error) return res.status(r.status).json({ error: r.error });
+
+    const result = await db.query(
+      'DELETE FROM unavailability WHERE id = $1 AND employee_id = $2',
+      [req.params.uid, r.employee.id]
+    );
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Unavailability not found' });
+    res.status(204).end();
+  } catch (err) {
+    console.error('DELETE unavailability failed:', err);
+    res.status(500).json({ error: err.message || 'Failed to delete unavailability' });
   }
 });
 

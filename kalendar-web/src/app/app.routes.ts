@@ -12,6 +12,7 @@ import { Settings } from './settings/settings';
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
 import { MyAppointments } from './my-appointments/my-appointments';
+import { MyJob } from './my-jobs/my-job';
 
 export const routes: Routes = [
   { path: '', component: Home, canActivate: [guestGuard] },
@@ -21,6 +22,7 @@ export const routes: Routes = [
   { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
   { path: 'settings', component: Settings, canActivate: [authGuard] },
   { path: 'my-appointments', component: MyAppointments, canActivate: [authGuard] },
+  { path: 'my-jobs/:slug', component: MyJob, canActivate: [authGuard] },
   { path: 'businesses', component: Businesses },
   { path: 'businesses/new', component: BusinessCreate, canActivate: [authGuard] },
   { path: 'businesses/:slug', component: BusinessDetail },

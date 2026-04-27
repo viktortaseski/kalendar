@@ -1,0 +1,114 @@
+<section class="page">
+  <div class="container">
+    @if (loading()) {
+      <div class="state-msg">Loading…</div>
+    } @else if (pageError()) {
+      <div class="state-msg error">{{ pageError() }}</div>
+    } @else if (job(); as j) {
+      <a [routerLink]="['/businesses', j.business_slug]" class="back-link">← View public page</a>
+
+      <header class="page-head">
+        <span class="eyebrow"><span class="dot"></span> My job</span>
+        <h1 class="page-title">{{ j.business_name }}</h1>
+        <p class="page-sub">You're listed as <strong>{{ j.employee_name }}</strong>. Set your own schedule and time off here.</p>
+      </header>
+
+      <!-- ─── WORKING HOURS ───────────────────────────────── -->
+      <section class="card-block">
+        <header class="block-head">
+          <h2>Working hours</h2>
+          <p>Times shown in the business timezone ({{ j.business_timezone }}).</p>
+        </header>
+
+        <div class="hours-grid">
+          @for (day of daysGrid(); track day.dayOfWeek; let i = $index) {
+            <div class="hour-row" [class.closed]="!day.open">
+              <button type="button" class="day-toggle" (click)="toggleDay(i)">
+                <span class="day-checkbox" [class.checked]="day.open">
+                  @if (day.open) { ✓ }
+                </span>
+                <span class="day-label">{{ day.label }}</span>
+              </button>
+
+              @if (day.open) {
+                <div class="time-inputs">
+                  <input type="time" [value]="day.startTime"
+                         (change)="updateTime(i, 'startTime', $any($event.target).value)" />
+                  <span class="time-sep">→</span>
+                  <input type="time" [value]="day.endTime"
+                         (change)="updateTime(i, 'endTime', $any($event.target).value)" />
+                </div>
+              } @else {
+                <span class="day-status">Off</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="hours-actions">
+          <button type="button" class="btn-save" (click)="saveHours()" [disabled]="hoursSaving()">
+            {{ hoursSaving() ? 'Saving…' : 'Save hours' }}
+          </button>
+          @if (hoursSaved()) {
+            <span class="saved-msg">Saved ✓</span>
+          }
+        </div>
+
+        @if (hoursError()) {
+          <div class="form-error">{{ hoursError() }}</div>
+        }
+      </section>
+
+      <!-- ─── UNAVAILABILITY ─────────────────────────────── -->
+      <section class="card-block">
+        <header class="block-head">
+          <h2>Time off</h2>
+          <p>Block days, vacations or sick time. Customers won't see these slots.</p>
+        </header>
+
+        @if (unavailability().length === 0) {
+          <div class="empty-row">No time off scheduled.</div>
+        } @else {
+          <ul class="row-list">
+            @for (u of unavailability(); track u.id) {
+              <li class="row">
+                <div class="row-main">
+                  <div class="row-name">
+                    {{ u.starts_at | date:'MMM d, y h:mm a' }}
+                    <span class="time-sep">→</span>
+                    {{ u.ends_at | date:'MMM d, y h:mm a' }}
+                  </div>
+                  @if (u.reason) {
+                    <div class="row-desc">{{ u.reason }}</div>
+                  }
+                </div>
+                <button class="row-delete" type="button" (click)="removeUnavailability(u)">Delete</button>
+              </li>
+            }
+          </ul>
+        }
+
+        <form class="inline-form" [formGroup]="unavailForm" (ngSubmit)="addUnavailability()" novalidate>
+          <div class="grid-3">
+            <label class="field">
+              <span class="field-label">Starts</span>
+              <input type="datetime-local" formControlName="startsAt" />
+            </label>
+            <label class="field">
+              <span class="field-label">Ends</span>
+              <input type="datetime-local" formControlName="endsAt" />
+            </label>
+            <label class="field">
+              <span class="field-label">Reason (optional)</span>
+              <input type="text" formControlName="reason" placeholder="Vacation, sick, lunch…" />
+            </label>
+          </div>
+          <button type="submit" class="btn-add">+ Add time off</button>
+        </form>
+        @if (unavailError()) {
+          <div class="form-error">{{ unavailError() }}</div>
+        }
+      </section>
+    }
+  </div>
+</section>

@@ -44,6 +44,24 @@
     }
   </div>
 
+  <div class="side-section">
+    <div class="side-section-head">
+      <span class="side-section-title">My jobs</span>
+    </div>
+    @if (myJobs().length === 0) {
+      <p class="side-empty">No jobs yet</p>
+    } @else {
+      <div class="biz-list">
+        @for (j of myJobs(); track j.employee_id) {
+          <a [routerLink]="['/my-jobs', j.business_slug]" routerLinkActive="active" class="side-link side-biz">
+            <span class="biz-mark">{{ j.business_name.charAt(0).toUpperCase() }}</span>
+            <span class="biz-link-name">{{ j.business_name }}</span>
+          </a>
+        }
+      </div>
+    }
+  </div>
+
   <div class="side-footer">
     <div class="side-user">
       <div class="user-avatar">{{ auth.currentUser()?.fullName?.charAt(0)?.toUpperCase() }}</div>
