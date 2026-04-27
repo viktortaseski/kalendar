@@ -94,7 +94,19 @@ Global CSS variables in `src/styles.scss` are the design system — use them, do
 - Radius: `--radius-sm/md/lg/xl/pill`
 - Shadows: `--shadow-sm/md/lg/xl`
 
-Reusable utility classes already defined: `.container`, `.btn-primary-lg`, `.btn-ghost`, `.section-head`, `.section-title`, `.section-sub`, `.eyebrow` (with `.dot`).
+Status colors (use these in components — don't hardcode hex):
+`--color-error`/`--color-error-bg`/`--color-error-border`, `--color-success`/`--color-success-bg`, `--color-warn`/`--color-warn-bg`, `--color-info`/`--color-info-bg`, `--color-neutral`/`--color-neutral-bg`, `--color-danger`/`--color-danger-bg`. Plus `--focus-ring` (the green focus halo).
+
+Reusable utility classes already defined in `styles.scss`:
+- **Layout / page chrome**: `.container`, `.back-link`, `.page-head`, `.page-title`, `.page-sub`, `.section-head`/`.section-title`/`.section-sub`, `.eyebrow` (`.dot`).
+- **Messages**: `.state-msg` (+ `.error` variant), `.form-error`, `.field-error`.
+- **Buttons** (pill-shaped):
+  - Filled (ink → accent on hover): `.btn-submit` (14×28), `.btn-add` (9×18), `.btn-save` (11×22), `.manage-btn` (8×16), `.btn-primary-lg` (large CTA).
+  - Outline: `.btn-back` (muted), `.btn-secondary`, `.btn-ghost`.
+  - Booking CTA (full-width green): `.btn-book`.
+- **Working hours editor**: `.hours-grid`, `.hour-row` (+`.closed`), `.day-toggle`, `.day-checkbox` (+`.checked`), `.day-label`, `.time-inputs`, `.time-sep`, `.day-status`. Use these — don't redefine in component scss.
+
+**Rule:** Before adding a new style to a component scss, check if there's a global utility for it. If two components need the same thing, lift it to `styles.scss` instead of duplicating.
 
 Layout in `app.scss`: `.app-shell` is a `260px 1fr` grid (sidebar + main) when logged in; collapses to mobile topbar at `≤768px`. Logged-out layout is nav + main + `.site-footer`.
 
