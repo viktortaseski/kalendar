@@ -1,7 +1,6 @@
 <section class="auth-page">
   <div class="auth-card">
     <header class="auth-head">
-      <a routerLink="/" class="logo-mark" aria-label="Home">K</a>
       <h1 class="auth-title">Create your account</h1>
       <p class="auth-sub">Start booking — or open your business — in minutes.</p>
     </header>
@@ -55,6 +54,26 @@
             @if (errs['required']) { Password is required }
             @else if (errs['minlength']) { At least 8 characters }
           </span>
+        }
+      </label>
+      <label class="field">
+        <span class="field-label">Retype Password</span>
+        <input
+          type="password"
+          formControlName="retypePassword"
+          placeholder="At least 8 characters"
+          autocomplete="new-password"
+          [class.invalid]="form.controls.retypePassword.touched && (form.controls.retypePassword.invalid || form.errors?.['passwordsMismatch'])"
+        />
+        @if (form.controls.retypePassword.touched) {
+          @if (form.controls.retypePassword.errors; as errs) {
+            <span class="field-error">
+              @if (errs['required']) { Please retype your password }
+              @else if (errs['minlength']) { At least 8 characters }
+            </span>
+          } @else if (form.errors?.['passwordsMismatch']) {
+            <span class="field-error">Passwords do not match</span>
+          }
         }
       </label>
 

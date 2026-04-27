@@ -152,11 +152,11 @@
             <div class="form-fields">
               <label class="form-label">
                 Name *
-                <input #nameInput class="form-input" type="text" placeholder="Your full name">
+                <input #nameInput class="form-input" type="text" placeholder="Your full name" [value]="auth.currentUser()?.fullName ?? ''">
               </label>
               <label class="form-label">
                 Email *
-                <input #emailInput class="form-input" type="email" placeholder="your@email.com">
+                <input #emailInput class="form-input" type="email" placeholder="your@email.com" [value]="auth.currentUser()?.email ?? ''">
               </label>
               <label class="form-label">
                 Phone
