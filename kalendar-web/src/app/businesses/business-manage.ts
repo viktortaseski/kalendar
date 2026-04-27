@@ -1,4 +1,5 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -40,6 +41,7 @@ export class BusinessManage implements OnInit {
   private api = inject(BusinessService);
   private auth = inject(AuthService);
   private planService = inject(PlanService);
+  private destroyRef = inject(DestroyRef);
 
   slug = '';
   business = signal<BusinessDetailModel | null>(null);
@@ -119,38 +121,66 @@ export class BusinessManage implements OnInit {
   });
 
   ngOnInit() {
-    const slug = this.route.snapshot.paramMap.get('slug');
-    if (!slug) {
-      this.pageError.set('Missing slug');
-      this.loading.set(false);
-      return;
-    }
-    this.slug = slug;
-
-    this.api.getBySlug(slug).subscribe({
-      next: (b) => {
-        const me = this.auth.currentUser();
-        if (!me || b.owner_id !== me.id) {
-          this.router.navigateByUrl(`/businesses/${slug}`);
+    this.route.paramMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const slug = params.get('slug');
+        if (!slug) {
+          this.pageError.set('Missing slug');
+          this.loading.set(false);
           return;
         }
-        this.business.set(b);
-        this.loading.set(false);
-        this.settingsForm.patchValue({
-          timezone: b.timezone,
-          slotDurationMinutes: b.slot_duration_minutes,
+        this.slug = slug;
+        this.resetForSlugChange();
+
+        this.api.getBySlug(slug).subscribe({
+          next: (b) => {
+            const me = this.auth.currentUser();
+            if (!me || b.owner_id !== me.id) {
+              this.router.navigateByUrl(`/businesses/${slug}`);
+              return;
+            }
+            this.business.set(b);
+            this.loading.set(false);
+            this.settingsForm.patchValue({
+              timezone: b.timezone,
+              slotDurationMinutes: b.slot_duration_minutes,
+            });
+            this.loadAppointments();
+            this.refreshServices();
+            this.refreshEmployees();
+            this.loadPlans(b.plan_type);
+            this.generateQr();
+          },
+          error: () => {
+            this.pageError.set('Could not load business');
+            this.loading.set(false);
+          },
         });
-        this.loadAppointments();
-        this.refreshServices();
-        this.refreshEmployees();
-        this.loadPlans(b.plan_type);
-        this.generateQr();
-      },
-      error: () => {
-        this.pageError.set('Could not load business');
-        this.loading.set(false);
-      },
-    });
+      });
+  }
+
+  private resetForSlugChange() {
+    this.loading.set(true);
+    this.pageError.set(null);
+    this.business.set(null);
+    this.appointments.set([]);
+    this.services.set([]);
+    this.employees.set([]);
+    this.selectedEmployeeId.set(null);
+    this.daysGrid.set(this.emptyGrid());
+    this.plans.set([]);
+    this.selectedPlanId.set(null);
+    this.qrDataUrl.set(null);
+    this.qrError.set(null);
+    this.serviceError.set(null);
+    this.employeeError.set(null);
+    this.hoursError.set(null);
+    this.hoursSaved.set(false);
+    this.settingsError.set(null);
+    this.settingsSaved.set(false);
+    this.planError.set(null);
+    this.planSaved.set(false);
   }
 
   setTab(tab: Tab) {
