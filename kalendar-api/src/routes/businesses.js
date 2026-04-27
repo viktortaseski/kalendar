@@ -95,15 +95,16 @@ businesses.get('/mine/list', requireAuth, async (req, res) => {
   }
 });
 
-// GET /api/businesses/:slug
+// GET /api/businesses/:slug  (also accepts numeric id)
 businesses.get('/:slug', async (req, res) => {
   try {
+    const isId = /^\d+$/.test(req.params.slug);
     const result = await db.query(
       `SELECT b.id, b.name, b.slug, b.description, b.timezone, b.slot_duration_minutes, b.owner_id,
               p.type AS plan_type
        FROM businesses b JOIN plans p ON p.id = b.plan_id
-       WHERE b.slug = $1 AND b.active = true`,
-      [req.params.slug]
+       WHERE ${isId ? 'b.id = $1' : 'b.slug = $1'} AND b.active = true`,
+      [isId ? Number(req.params.slug) : req.params.slug]
     );
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Business not found' });

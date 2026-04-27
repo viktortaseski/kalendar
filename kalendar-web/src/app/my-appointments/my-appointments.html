@@ -10,9 +10,10 @@
     <div class="action-grid">
       @for (appointment of (appointments | async); track appointment.id) {
       <div class="appointment-card">
-        <h2>{{ appointment.customer_name }}</h2>
-        <p><strong>Date:</strong> {{ appointment.date }}</p>
-        <p><strong>Time:</strong> {{ appointment.time }}</p>
+        <h2><strong>Business:</strong> {{ appointment.business_name }}</h2>
+        <p><strong>Booked at:</strong> {{appointment.employee_name}}</p>
+        <p><strong>Booked by:</strong> {{ appointment.customer_name }}</p>
+        <p><strong>Date:</strong> {{ appointment.starts_at | date:'MMM d y, h:mm a' }}</p>
       </div>
       }
     </div>
