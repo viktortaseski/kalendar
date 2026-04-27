@@ -5,90 +5,229 @@
     <header class="page-head">
       <span class="eyebrow"><span class="dot"></span> New business</span>
       <h1 class="page-title">Set up your business</h1>
-      <p class="page-sub">Pick a plan, name your business, and start taking bookings.</p>
+      <p class="page-sub">{{ currentStep() === 1 ? 'Pick a plan and name your business.' : 'Add your first employee and service.' }}</p>
     </header>
 
-    <form class="create-form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-      <fieldset class="step">
-        <legend>1. Choose a plan</legend>
-        @if (loadingPlans()) {
-          <p class="muted">Loading plans…</p>
-        } @else {
-          <div class="plan-grid">
-            @for (plan of plans(); track plan.id) {
-              <label class="plan-option" [class.selected]="form.controls.planId.value === plan.id">
+    <!-- Step indicator -->
+    <div class="step-indicator">
+      <div class="step-dot" [class.active]="currentStep() >= 1" [class.done]="currentStep() > 1">1</div>
+      <div class="step-line"></div>
+      <div class="step-dot" [class.active]="currentStep() >= 2">2</div>
+    </div>
+
+    <!-- ═══════════════════════ STEP 1 ═══════════════════════ -->
+    @if (currentStep() === 1) {
+      <form class="create-form" [formGroup]="form" novalidate>
+
+        <fieldset class="step">
+          <legend>1. Choose a plan</legend>
+          @if (loadingPlans()) {
+            <p class="muted">Loading plans…</p>
+          } @else {
+            <div class="plan-grid">
+              @for (plan of plans(); track plan.id) {
+                <label class="plan-option" [class.selected]="form.controls.planId.value === plan.id">
+                  <input
+                    type="radio"
+                    [value]="plan.id"
+                    [checked]="form.controls.planId.value === plan.id"
+                    (change)="selectPlan(plan.id)"
+                  />
+                  <div class="plan-head">
+                    <span class="plan-type">{{ plan.type }}</span>
+                    @if (plan.featured) { <span class="plan-badge">Most popular</span> }
+                  </div>
+                  <div class="plan-price">
+                    <span class="amount">${{ plan.price }}</span>
+                    <span class="period">/mo</span>
+                  </div>
+                  <p class="plan-desc">{{ plan.description }}</p>
+                </label>
+              }
+            </div>
+          }
+        </fieldset>
+
+        <fieldset class="step">
+          <legend>2. About your business</legend>
+          <label class="field">
+            <span class="field-label">Business name</span>
+            <input
+              type="text"
+              formControlName="name"
+              placeholder="Bloom Hair Studio"
+              [class.invalid]="form.controls.name.touched && form.controls.name.invalid"
+            />
+            @if (form.controls.name.touched && form.controls.name.errors; as errs) {
+              <span class="field-error">
+                @if (errs['required']) { Name is required }
+                @else if (errs['minlength']) { At least 2 characters }
+              </span>
+            }
+          </label>
+
+          <label class="field">
+            <span class="field-label">Description <span class="muted">(optional)</span></span>
+            <textarea rows="3" formControlName="description" placeholder="Cozy salon in the heart of downtown."></textarea>
+          </label>
+        </fieldset>
+
+        <fieldset class="step">
+          <legend>3. Calendar settings</legend>
+          <div class="row">
+            <label class="field">
+              <span class="field-label">Timezone</span>
+              <input type="text" formControlName="timezone" placeholder="UTC" />
+              <span class="field-hint">e.g. America/Los_Angeles, Europe/Berlin</span>
+            </label>
+
+            <label class="field">
+              <span class="field-label">Slot duration (minutes)</span>
+              <input type="number" formControlName="slotDurationMinutes" min="5" step="5" />
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="step-nav">
+          <button type="button" class="btn-submit" (click)="goToStep2()">
+            Continue → Add staff &amp; services
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- ═══════════════════════ STEP 2 ═══════════════════════ -->
+    @if (currentStep() === 2) {
+      <div class="create-form">
+
+        <!-- Employee -->
+        <fieldset class="step">
+          <legend>4. First employee</legend>
+          <p class="step-hint">This is the first person who will take bookings. You can add more from the manage page later.</p>
+
+          <form [formGroup]="employeeForm" novalidate>
+            <div class="row">
+              <label class="field">
+                <span class="field-label">Name</span>
                 <input
-                  type="radio"
-                  [value]="plan.id"
-                  [checked]="form.controls.planId.value === plan.id"
-                  (change)="selectPlan(plan.id)"
+                  type="text"
+                  formControlName="name"
+                  placeholder="Maria Chen"
+                  [class.invalid]="employeeForm.controls.name.touched && employeeForm.controls.name.invalid"
                 />
-                <div class="plan-head">
-                  <span class="plan-type">{{ plan.type }}</span>
-                  @if (plan.featured) { <span class="plan-badge">Most popular</span> }
-                </div>
-                <div class="plan-price">
-                  <span class="amount">${{ plan.price }}</span>
-                  <span class="period">/mo</span>
-                </div>
-                <p class="plan-desc">{{ plan.description }}</p>
+                @if (employeeForm.controls.name.touched && employeeForm.controls.name.errors; as errs) {
+                  <span class="field-error">
+                    @if (errs['required']) { Name is required }
+                    @else if (errs['minlength']) { At least 2 characters }
+                  </span>
+                }
               </label>
+
+              <label class="field">
+                <span class="field-label">Email <span class="muted">(optional)</span></span>
+                <input type="email" formControlName="email" placeholder="maria@example.com" />
+              </label>
+            </div>
+          </form>
+        </fieldset>
+
+        <!-- Working hours -->
+        <fieldset class="step">
+          <legend>5. Working hours</legend>
+          <p class="step-hint">Toggle the days they work and set the start/end times. At least one day is required.</p>
+
+          <div class="hours-grid">
+            @for (day of daysGrid(); track day.dayOfWeek; let i = $index) {
+              <div class="hour-row" [class.closed]="!day.open">
+                <button type="button" class="day-toggle" (click)="toggleDay(i)">
+                  <span class="day-checkbox" [class.checked]="day.open">
+                    @if (day.open) { ✓ }
+                  </span>
+                  <span class="day-label">{{ day.label }}</span>
+                </button>
+
+                @if (day.open) {
+                  <div class="time-inputs">
+                    <input
+                      type="time"
+                      [value]="day.startTime"
+                      (change)="updateTime(i, 'startTime', $any($event.target).value)"
+                    />
+                    <span class="time-sep">→</span>
+                    <input
+                      type="time"
+                      [value]="day.endTime"
+                      (change)="updateTime(i, 'endTime', $any($event.target).value)"
+                    />
+                  </div>
+                } @else {
+                  <span class="day-status">Closed</span>
+                }
+              </div>
             }
           </div>
-        }
-      </fieldset>
 
-      <fieldset class="step">
-        <legend>2. About your business</legend>
-        <label class="field">
-          <span class="field-label">Business name</span>
-          <input
-            type="text"
-            formControlName="name"
-            placeholder="Bloom Hair Studio"
-            [class.invalid]="form.controls.name.touched && form.controls.name.invalid"
-          />
-          @if (form.controls.name.touched && form.controls.name.errors; as errs) {
-            <span class="field-error">
-              @if (errs['required']) { Name is required }
-              @else if (errs['minlength']) { At least 2 characters }
-            </span>
+          @if (hoursError()) {
+            <div class="form-error">{{ hoursError() }}</div>
           }
-        </label>
+        </fieldset>
 
-        <label class="field">
-          <span class="field-label">Description <span class="muted">(optional)</span></span>
-          <textarea
-            rows="3"
-            formControlName="description"
-            placeholder="Cozy salon in the heart of downtown."
-          ></textarea>
-        </label>
-      </fieldset>
+        <!-- Service -->
+        <fieldset class="step">
+          <legend>6. First service</legend>
+          <p class="step-hint">Add the first service customers can book. You can add more from the manage page later.</p>
 
-      <fieldset class="step">
-        <legend>3. Calendar settings</legend>
-        <div class="row">
-          <label class="field">
-            <span class="field-label">Timezone</span>
-            <input type="text" formControlName="timezone" placeholder="UTC" />
-            <span class="field-hint">e.g. America/Los_Angeles, Europe/Berlin</span>
-          </label>
+          <form [formGroup]="serviceForm" novalidate>
+            <div class="row">
+              <label class="field">
+                <span class="field-label">Service name</span>
+                <input
+                  type="text"
+                  formControlName="name"
+                  placeholder="Haircut"
+                  [class.invalid]="serviceForm.controls.name.touched && serviceForm.controls.name.invalid"
+                />
+                @if (serviceForm.controls.name.touched && serviceForm.controls.name.errors; as errs) {
+                  <span class="field-error">
+                    @if (errs['required']) { Name is required }
+                    @else if (errs['minlength']) { At least 2 characters }
+                  </span>
+                }
+              </label>
 
-          <label class="field">
-            <span class="field-label">Slot duration (minutes)</span>
-            <input type="number" formControlName="slotDurationMinutes" min="5" step="5" />
-          </label>
+              <label class="field">
+                <span class="field-label">Duration (minutes)</span>
+                <input
+                  type="number"
+                  formControlName="durationMinutes"
+                  min="5"
+                  step="5"
+                  [class.invalid]="serviceForm.controls.durationMinutes.touched && serviceForm.controls.durationMinutes.invalid"
+                />
+                @if (serviceForm.controls.durationMinutes.touched && serviceForm.controls.durationMinutes.errors; as errs) {
+                  <span class="field-error">
+                    @if (errs['required']) { Duration is required }
+                    @else if (errs['min']) { At least 5 minutes }
+                  </span>
+                }
+              </label>
+            </div>
+          </form>
+        </fieldset>
+
+        @if (errorMessage()) {
+          <div class="form-error">{{ errorMessage() }}</div>
+        }
+
+        <div class="step-nav">
+          <button type="button" class="btn-back" (click)="goToStep1()" [disabled]="submitting()">
+            ← Back
+          </button>
+          <button type="button" class="btn-submit" (click)="onSubmit()" [disabled]="submitting()">
+            {{ submitting() ? 'Creating…' : 'Create business' }}
+          </button>
         </div>
-      </fieldset>
-
-      @if (errorMessage()) {
-        <div class="form-error">{{ errorMessage() }}</div>
-      }
-
-      <button type="submit" class="btn-submit" [disabled]="submitting()">
-        {{ submitting() ? 'Creating…' : 'Create business' }}
-      </button>
-    </form>
+      </div>
+    }
   </div>
 </section>

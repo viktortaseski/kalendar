@@ -147,7 +147,8 @@ export class BusinessManage implements OnInit {
     this.appointmentsError.set(null);
     this.api.getBusinessAppointments(this.slug).subscribe({
       next: (rows) => {
-        this.appointments.set(rows);
+        const sorted = rows.sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
+        this.appointments.set(sorted);
         this.appointmentsLoading.set(false);
       },
       error: (err) => {
