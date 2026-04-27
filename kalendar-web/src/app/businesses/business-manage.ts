@@ -15,6 +15,7 @@ import {
 import { AuthService } from '../services/auth.service';
 import { PlanService, Plan } from '../services/plan.service';
 import { environment } from '../../environments/environment';
+import { TimezoneGroup, getGroupedTimezones } from '../timezones';
 
 type Tab = 'appointments' | 'staff' | 'settings' | 'plans' | 'billing';
 
@@ -103,6 +104,7 @@ export class BusinessManage implements OnInit {
   );
 
   // ─── Settings ────────────────────────────────────────────
+  timezoneGroups: TimezoneGroup[] = getGroupedTimezones();
   settingsForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
     timezone: ['UTC', [Validators.required]],

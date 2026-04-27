@@ -137,7 +137,8 @@
 .field-label { font-size: 13px; font-weight: 500; color: var(--color-ink); }
 
 .field input,
-.field textarea {
+.field textarea,
+.field select {
   width: 100%;
   padding: 12px 14px;
   font-family: inherit;

@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { map, switchMap } from 'rxjs';
 import { BusinessService } from '../services/business.service';
 import { Plan, PlanService } from '../services/plan.service';
+import { TimezoneGroup, detectBrowserTimezone, getGroupedTimezones } from '../timezones';
 
 type Step = 1 | 2;
 
@@ -37,12 +38,14 @@ export class BusinessCreate implements OnInit {
   hoursError   = signal<string | null>(null);
   currentStep  = signal<Step>(1);
 
+  timezoneGroups: TimezoneGroup[] = getGroupedTimezones();
+
   // ─── Step 1: plan + business details + calendar ───────────
   form = this.fb.nonNullable.group({
     name:                ['', [Validators.required, Validators.minLength(2)]],
     description:         [''],
     planId:              [0, [Validators.required, Validators.min(1)]],
-    timezone:            ['UTC'],
+    timezone:            [detectBrowserTimezone(), [Validators.required]],
     slotDurationMinutes: [30, [Validators.required, Validators.min(5)]],
   });
 

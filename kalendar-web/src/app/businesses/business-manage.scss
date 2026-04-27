@@ -168,7 +168,8 @@
   flex-direction: column;
   gap: var(--space-5);
 
-  input {
+  input,
+  select {
     padding: 10px 14px;
     font-family: inherit;
     font-size: 14px;

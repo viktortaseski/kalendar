@@ -281,13 +281,19 @@
 
             <label class="settings-field">
               <span class="settings-label">Timezone</span>
-              <input
-                type="text"
+              <select
                 formControlName="timezone"
-                placeholder="e.g. America/New_York"
                 [class.invalid]="settingsForm.controls.timezone.touched && settingsForm.controls.timezone.invalid"
-              />
-              <span class="settings-hint">IANA timezone name — e.g. <code>Europe/Paris</code>, <code>Asia/Tokyo</code></span>
+              >
+                @for (group of timezoneGroups; track group.region) {
+                  <optgroup [label]="group.region">
+                    @for (zone of group.zones; track zone) {
+                      <option [value]="zone">{{ zone }}</option>
+                    }
+                  </optgroup>
+                }
+              </select>
+              <span class="settings-hint">Times for bookings will use this zone.</span>
             </label>
 
             <label class="settings-field">
