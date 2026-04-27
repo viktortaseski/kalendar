@@ -19,7 +19,8 @@ src/
 ├── server.ts           Express SSR server
 ├── styles.scss         global tokens (--color-*, --space-*, --radius-*, --shadow-*) + .container, .btn-primary-lg, .btn-ghost, .section-head, .eyebrow
 ├── environments/
-│   └── environment.ts  { production, apiBaseUrl, publicDomain }
+│   ├── environment.ts       dev — { production:false, apiBaseUrl:'http://localhost:3000/api', publicDomain:'localhost:4200' }
+│   └── environment.prod.ts  prod — same shape, prod URLs. Swapped at build time via `fileReplacements` in angular.json.
 └── app/
     ├── app.ts/.html/.scss   Shell — sidebar layout when logged in, nav+footer when guest
     ├── app.config.ts        Providers: router, hydration, http+authInterceptor
@@ -111,6 +112,44 @@ State machine signal `bookingStep`: `'calendar' → 'slots' → 'form' → 'done
 - All `localStorage` access must check `typeof localStorage !== 'undefined'` (already done in `AuthService`).
 - `provideClientHydration(withEventReplay())` is configured.
 - Don't use `window`/`document` directly in components — gate via `isPlatformBrowser` or move to a browser-only effect.
+
+## Environments & build-time config
+
+No `.env` file in this project — Angular doesn't read env vars at runtime. Config is swapped at **build time** via `angular.json → architect.build.configurations.production.fileReplacements`:
+
+```json
+{ "replace": "src/environments/environment.ts",
+  "with":    "src/environments/environment.prod.ts" }
+```
+
+`defaultConfiguration` is `production`, so plain `ng build` already produces a prod bundle. `ng serve` uses `development` (no replacement → reads `environment.ts`).
+
+Both env files MUST export the same shape:
+
+```ts
+export const environment = {
+  production: boolean,
+  apiBaseUrl: string,   // e.g. 'http://localhost:3000/api'
+  publicDomain: string, // e.g. 'localhost:4200' — used to build QR/public URLs
+};
+```
+
+Keep keys in sync. Don't rename one without renaming the other (and the consumers).
+
+## Deployment (Render)
+
+This is a Node Web Service (SSR), **not** a Static Site.
+
+| Setting          | Value |
+|------------------|-------|
+| Build command    | `npm install && npx ng build` |
+| Start command    | `node dist/kalendar/server/server.mjs` |
+| Node version     | 20 LTS recommended |
+| Public URL       | `https://kalendar-web.onrender.com` |
+
+The companion API service (`kalendar-api`) must include this URL in its `CORS_ORIGINS` env var, otherwise the browser blocks every request.
+
+If you change the prod API URL, update `environment.prod.ts` — that's the only place it lives.
 
 ## Don'ts
 

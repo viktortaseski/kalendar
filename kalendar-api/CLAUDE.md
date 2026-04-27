@@ -34,7 +34,7 @@ qr-generator/         Python QR code script for booking URLs
 | `DATABASE_URL`   | yes      | Postgres URL. SSL auto-enabled if URL contains `dpg-` (Render). |
 | `JWT_SECRET`     | yes      | HMAC secret for `jsonwebtoken`. |
 | `PORT`           | no       | Default 3000. |
-| `CORS_ORIGINS`   | no       | Comma-separated. Default `http://localhost:4200`. |
+| `CORS_ORIGINS`   | no       | Comma-separated. Default `http://localhost:4200`. **In prod must include the deployed kalendar-web URL** (e.g. `https://kalendar-web.onrender.com`) or the browser blocks every request. |
 
 ## Routes summary
 
