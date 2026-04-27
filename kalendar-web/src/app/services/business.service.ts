@@ -70,6 +70,10 @@ export class BusinessService {
     return this.http.get<BusinessDetail>(`${this.base}/${slug}`);
   }
 
+  getById(id: number): Observable<BusinessDetail> {
+    return this.http.get<BusinessDetail>(`${this.base}/${id}`);
+  }
+
   create(payload: CreateBusinessPayload): Observable<BusinessDetail> {
     return this.http.post<BusinessDetail>(this.base, payload);
   }
@@ -82,7 +86,10 @@ export class BusinessService {
   listServices(slug: string): Observable<Service[]> {
     return this.http.get<Service[]>(`${this.base}/${slug}/services`);
   }
-  createService(slug: string, p: { name: string; durationMinutes: number; priceCents?: number; description?: string }) {
+  createService(
+    slug: string,
+    p: { name: string; durationMinutes: number; priceCents?: number; description?: string },
+  ) {
     return this.http.post<Service>(`${this.base}/${slug}/services`, p);
   }
   deleteService(slug: string, id: number) {
@@ -107,23 +114,46 @@ export class BusinessService {
   // Availability & Appointments
   getAvailability(slug: string, employeeId: number, date: string): Observable<{ slots: string[] }> {
     const params = new HttpParams().set('date', date);
-    return this.http.get<{ slots: string[] }>(`${this.base}/${slug}/employees/${employeeId}/availability`, { params });
+    return this.http.get<{ slots: string[] }>(
+      `${this.base}/${slug}/employees/${employeeId}/availability`,
+      { params },
+    );
   }
 
-  createAppointment(slug: string, payload: {
-    employeeId: number; date: string; startTime: string;
-    customerName: string; customerEmail: string; customerPhone?: string; notes?: string; serviceId?: number;
-  }): Observable<{ id: number; starts_at: string; ends_at: string; status: string }> {
+  createAppointment(
+    slug: string,
+    payload: {
+      employeeId: number;
+      customerId: number;
+      date: string;
+      startTime: string;
+      customerName: string;
+      customerEmail: string;
+      customerPhone?: string;
+      notes?: string;
+      serviceId?: number;
+    },
+  ): Observable<{ id: number; starts_at: string; ends_at: string; status: string }> {
     return this.http.post<{ id: number; starts_at: string; ends_at: string; status: string }>(
-      `${this.base}/${slug}/appointments`, payload
+      `${this.base}/${slug}/appointments`,
+      payload,
     );
   }
 
   // Working hours
   getWorkingHours(slug: string, employeeId: number): Observable<WorkingHourRow[]> {
-    return this.http.get<WorkingHourRow[]>(`${this.base}/${slug}/employees/${employeeId}/working-hours`);
+    return this.http.get<WorkingHourRow[]>(
+      `${this.base}/${slug}/employees/${employeeId}/working-hours`,
+    );
   }
-  putWorkingHours(slug: string, employeeId: number, hours: { dayOfWeek: number; startTime: string; endTime: string }[]) {
-    return this.http.put<WorkingHourRow[]>(`${this.base}/${slug}/employees/${employeeId}/working-hours`, { hours });
+  putWorkingHours(
+    slug: string,
+    employeeId: number,
+    hours: { dayOfWeek: number; startTime: string; endTime: string }[],
+  ) {
+    return this.http.put<WorkingHourRow[]>(
+      `${this.base}/${slug}/employees/${employeeId}/working-hours`,
+      { hours },
+    );
   }
 }

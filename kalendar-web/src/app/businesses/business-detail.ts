@@ -172,6 +172,7 @@ export class BusinessDetail implements OnInit {
 
     this.businesses.createAppointment(slug, {
       employeeId: this.selectedMember()!.id,
+      customerId: this.auth.currentUser()!.id,
       date: this.selectedDate()!,
       startTime: this.selectedSlot()!,
       customerName: name.trim(),

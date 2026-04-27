@@ -1,0 +1,31 @@
+:host {
+  display: block;
+}
+
+.dashboard {
+  padding: var(--space-16) 0 var(--space-12);
+}
+
+.dash-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-12);
+}
+
+.dash-title {
+  font-size: clamp(32px, 4.5vw, 48px);
+  letter-spacing: -0.03em;
+}
+
+.dash-sub {
+  font-size: 18px;
+  color: var(--color-ink-muted);
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-6);
+  margin-bottom: var(--space-16);
+}
