@@ -567,13 +567,17 @@ businesses.get('/:slug/appointments', requireAuth, async (req, res) => {
   }
 });
 
-// PUT /:slug/settings — owner only, update timezone / slot duration
+// PUT /:slug/settings — owner only, update name / timezone / slot duration
 businesses.put('/:slug/settings', requireAuth, async (req, res) => {
   try {
     const r = await loadBySlug(req.params.slug, true, req.user.sub);
     if (r.error) return res.status(r.status).json({ error: r.error });
 
-    const { timezone, slotDurationMinutes } = req.body || {};
+    const { name, timezone, slotDurationMinutes } = req.body || {};
+    const trimmedName = typeof name === 'string' ? name.trim() : null;
+    if (name !== undefined && (!trimmedName || trimmedName.length < 2)) {
+      return res.status(400).json({ error: 'name must be at least 2 characters' });
+    }
     const tz   = timezone ? safeTz(timezone) : null;
     const slot = slotDurationMinutes ? Number(slotDurationMinutes) : null;
     if (slot !== null && slot < 5) {
@@ -582,12 +586,13 @@ businesses.put('/:slug/settings', requireAuth, async (req, res) => {
 
     const result = await db.query(
       `UPDATE businesses
-       SET timezone              = COALESCE($1, timezone),
-           slot_duration_minutes = COALESCE($2, slot_duration_minutes),
+       SET name                  = COALESCE($1, name),
+           timezone              = COALESCE($2, timezone),
+           slot_duration_minutes = COALESCE($3, slot_duration_minutes),
            updated_at            = NOW()
-       WHERE id = $3
-       RETURNING timezone, slot_duration_minutes`,
-      [tz, slot, r.business.id]
+       WHERE id = $4
+       RETURNING name, timezone, slot_duration_minutes`,
+      [trimmedName, tz, slot, r.business.id]
     );
     res.json(result.rows[0]);
   } catch (err) {

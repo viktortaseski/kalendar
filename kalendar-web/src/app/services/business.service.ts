@@ -162,9 +162,9 @@ export class BusinessService {
 
   updateSettings(
     slug: string,
-    payload: { timezone?: string; slotDurationMinutes?: number },
-  ): Observable<{ timezone: string; slot_duration_minutes: number }> {
-    return this.http.put<{ timezone: string; slot_duration_minutes: number }>(
+    payload: { name?: string; timezone?: string; slotDurationMinutes?: number },
+  ): Observable<{ name: string; timezone: string; slot_duration_minutes: number }> {
+    return this.http.put<{ name: string; timezone: string; slot_duration_minutes: number }>(
       `${this.base}/${slug}/settings`,
       payload,
     );

@@ -223,6 +223,17 @@
 
           <form class="settings-form" [formGroup]="settingsForm" (ngSubmit)="saveSettings()" novalidate>
             <label class="settings-field">
+              <span class="settings-label">Business name</span>
+              <input
+                type="text"
+                formControlName="name"
+                placeholder="Your business name"
+                [class.invalid]="settingsForm.controls.name.touched && settingsForm.controls.name.invalid"
+              />
+              <span class="settings-hint">Public display name. Booking URL (slug) won't change.</span>
+            </label>
+
+            <label class="settings-field">
               <span class="settings-label">Timezone</span>
               <input
                 type="text"

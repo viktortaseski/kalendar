@@ -86,6 +86,7 @@ export class BusinessManage implements OnInit {
 
   // ─── Settings ────────────────────────────────────────────
   settingsForm = this.fb.nonNullable.group({
+    name: ['', [Validators.required, Validators.minLength(2)]],
     timezone: ['UTC', [Validators.required]],
     slotDurationMinutes: [30, [Validators.required, Validators.min(5)]],
   });
@@ -143,6 +144,7 @@ export class BusinessManage implements OnInit {
             this.business.set(b);
             this.loading.set(false);
             this.settingsForm.patchValue({
+              name: b.name,
               timezone: b.timezone,
               slotDurationMinutes: b.slot_duration_minutes,
             });
@@ -367,12 +369,21 @@ export class BusinessManage implements OnInit {
     this.settingsSaving.set(true);
     const v = this.settingsForm.getRawValue();
     this.api
-      .updateSettings(this.slug, { timezone: v.timezone, slotDurationMinutes: v.slotDurationMinutes })
+      .updateSettings(this.slug, {
+        name: v.name.trim(),
+        timezone: v.timezone,
+        slotDurationMinutes: v.slotDurationMinutes,
+      })
       .subscribe({
         next: (updated) => {
           this.business.update((b) =>
             b
-              ? { ...b, timezone: updated.timezone, slot_duration_minutes: updated.slot_duration_minutes }
+              ? {
+                  ...b,
+                  name: updated.name,
+                  timezone: updated.timezone,
+                  slot_duration_minutes: updated.slot_duration_minutes,
+                }
               : b,
           );
           this.settingsSaving.set(false);
