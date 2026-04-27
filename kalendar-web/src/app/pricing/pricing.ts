@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
-import { PricingCard, type Plan } from './pricing-card/pricing-card';
+import { Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { PricingCard } from './pricing-card/pricing-card';
+import { PlanService } from '../services/plan.service';
 
 @Component({
   selector: 'app-pricing',
@@ -8,38 +10,9 @@ import { PricingCard, type Plan } from './pricing-card/pricing-card';
   styleUrl: './pricing.scss',
 })
 export class Pricing {
-  plans: Plan[] = [
-    {
-      type: 'Basic',
-      price: 19,
-      description: 'For solo practitioners and small shops getting started.',
-      features: [
-        'Up to 2 staff calendars',
-        'Unlimited appointments',
-        'Email reminders',
-        'Custom booking page',
-        'Basic analytics',
-      ],
-      cta: 'Start free trial',
-      featured: false,
-    },
-    {
-      type: 'Premium',
-      price: 49,
-      description: 'For growing teams that need more power and polish.',
-      features: [
-        'Up to 15 staff calendars',
-        'Unlimited appointments',
-        'SMS + email reminders',
-        'Custom domain & branding',
-        'Advanced analytics',
-        'Stripe payments',
-        'Priority support',
-      ],
-      cta: 'Start free trial',
-      featured: true,
-    },
-  ];
+  private planService = inject(PlanService);
+
+  plans = toSignal(this.planService.list(), { initialValue: [] });
 
   faqs = [
     {

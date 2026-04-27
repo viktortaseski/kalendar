@@ -7,7 +7,7 @@
     </header>
 
     <div class="cards">
-      @for (plan of plans; track plan.type) {
+      @for (plan of plans(); track plan.type) {
         <app-pricing-card [plan]="plan" />
       }
     </div>
