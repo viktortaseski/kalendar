@@ -39,7 +39,7 @@
             "server": "src/main.server.ts",
             "outputMode": "server",
             "security": {
-              "allowedHosts": []
+              "allowedHosts": ["kalendar-web.onrender.com"]
             },
             "ssr": {
               "entry": "src/server.ts"
