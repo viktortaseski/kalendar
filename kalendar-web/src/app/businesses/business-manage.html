@@ -5,152 +5,347 @@
     } @else if (pageError()) {
       <div class="state-msg error">{{ pageError() }}</div>
     } @else if (business(); as b) {
-      <a [routerLink]="['/businesses', b.slug]" class="back-link">← View business</a>
+      <a [routerLink]="['/businesses', b.slug]" class="back-link">← View public page</a>
 
       <header class="page-head">
         <span class="eyebrow"><span class="dot"></span> Manage</span>
         <h1 class="page-title">{{ b.name }}</h1>
-        <p class="page-sub">Set up services, staff, and hours.</p>
       </header>
 
-      <!-- ─── SERVICES ─────────────────────────────────────── -->
-      <section class="card-block">
-        <header class="block-head">
-          <h2>Services</h2>
-          <p>What you offer — name, duration, and (optional) price.</p>
-        </header>
+      <!-- ─── TAB BAR ─────────────────────────────────────── -->
+      <nav class="tabs">
+        <button class="tab" [class.active]="activeTab() === 'appointments'" (click)="setTab('appointments')">
+          Appointments
+        </button>
+        <button class="tab" [class.active]="activeTab() === 'staff'" (click)="setTab('staff')">
+          Staff
+        </button>
+        <button class="tab" [class.active]="activeTab() === 'settings'" (click)="setTab('settings')">
+          Settings
+        </button>
+        <button class="tab" [class.active]="activeTab() === 'plans'" (click)="setTab('plans')">
+          Plans
+        </button>
+        <button class="tab" [class.active]="activeTab() === 'billing'" (click)="setTab('billing')">
+          Billing
+        </button>
+      </nav>
 
-        @if (services().length === 0) {
-          <div class="empty-row">No services yet. Add your first one below.</div>
-        } @else {
-          <ul class="row-list">
-            @for (s of services(); track s.id) {
-              <li class="row">
-                <div class="row-main">
-                  <div class="row-name">{{ s.name }}</div>
-                  @if (s.description) {
-                    <div class="row-desc">{{ s.description }}</div>
-                  }
-                </div>
-                <div class="row-meta">
-                  <span>{{ s.duration_minutes }} min</span>
-                  @if (s.price_cents !== null) {
-                    <span>${{ s.price_cents / 100 | number:'1.2-2' }}</span>
-                  }
-                </div>
-                <button class="row-delete" type="button" (click)="removeService(s)">Delete</button>
-              </li>
-            }
-          </ul>
-        }
+      <!-- ─── APPOINTMENTS ────────────────────────────────── -->
+      @if (activeTab() === 'appointments') {
+        <section class="card-block">
+          <header class="block-head">
+            <h2>Appointments</h2>
+            <p>All bookings made to {{ b.name }}, newest first.</p>
+          </header>
 
-        <form class="inline-form" [formGroup]="serviceForm" (ngSubmit)="addService()" novalidate>
-          <div class="grid-4">
-            <input type="text" formControlName="name" placeholder="Service name (e.g. Haircut)" />
-            <input type="number" formControlName="durationMinutes" min="5" step="5" placeholder="Minutes" />
-            <input type="number" formControlName="priceCents" min="0" step="100" placeholder="Price (cents)" />
-            <input type="text" formControlName="description" placeholder="Description (optional)" />
-          </div>
-          <button type="submit" class="btn-add">+ Add service</button>
-        </form>
-        @if (serviceError()) {
-          <div class="form-error">{{ serviceError() }}</div>
-        }
-      </section>
-
-      <!-- ─── EMPLOYEES ────────────────────────────────────── -->
-      <section class="card-block">
-        <header class="block-head">
-          <h2>Staff</h2>
-          <p>Each staff member gets their own schedule below.</p>
-        </header>
-
-        @if (employees().length === 0) {
-          <div class="empty-row">No staff yet. Add yourself or your team below.</div>
-        } @else {
-          <ul class="row-list">
-            @for (e of employees(); track e.id) {
-              <li class="row" [class.selected]="e.id === selectedEmployeeId()">
-                <div class="row-main">
-                  <div class="row-name">{{ e.name }}</div>
-                  @if (e.email) {
-                    <div class="row-desc">{{ e.email }}</div>
-                  }
-                </div>
-                <div class="row-actions">
-                  <button class="row-select" type="button" (click)="selectEmployee(e.id)">
-                    {{ e.id === selectedEmployeeId() ? 'Editing hours' : 'Edit hours' }}
-                  </button>
-                  <button class="row-delete" type="button" (click)="removeEmployee(e)">Delete</button>
-                </div>
-              </li>
-            }
-          </ul>
-        }
-
-        <form class="inline-form" [formGroup]="employeeForm" (ngSubmit)="addEmployee()" novalidate>
-          <div class="grid-2">
-            <input type="text" formControlName="name" placeholder="Staff name (e.g. Maria Chen)" />
-            <input type="email" formControlName="email" placeholder="Email (optional)" />
-          </div>
-          <button type="submit" class="btn-add">+ Add staff</button>
-        </form>
-        @if (employeeError()) {
-          <div class="form-error">{{ employeeError() }}</div>
-        }
-      </section>
-
-      <!-- ─── WORKING HOURS ────────────────────────────────── -->
-      <section class="card-block">
-        <header class="block-head">
-          <h2>Working hours</h2>
-          @if (selectedEmployee(); as emp) {
-            <p>Weekly schedule for <strong>{{ emp.name }}</strong>.</p>
+          @if (appointmentsLoading()) {
+            <div class="empty-row">Loading…</div>
+          } @else if (appointmentsError()) {
+            <div class="form-error">{{ appointmentsError() }}</div>
+          } @else if (appointments().length === 0) {
+            <div class="empty-row">No appointments yet.</div>
           } @else {
-            <p>Add a staff member above to set their schedule.</p>
-          }
-        </header>
-
-        @if (selectedEmployee()) {
-          <div class="hours-grid">
-            @for (day of daysGrid(); track day.dayOfWeek; let i = $index) {
-              <div class="hour-row" [class.closed]="!day.open">
-                <button type="button" class="day-toggle" (click)="toggleDay(i)">
-                  <span class="day-checkbox" [class.checked]="day.open">
-                    @if (day.open) { ✓ }
-                  </span>
-                  <span class="day-label">{{ day.label }}</span>
-                </button>
-
-                @if (day.open) {
-                  <div class="time-inputs">
-                    <input type="time" [value]="day.startTime"
-                           (change)="updateTime(i, 'startTime', $any($event.target).value)" />
-                    <span class="time-sep">→</span>
-                    <input type="time" [value]="day.endTime"
-                           (change)="updateTime(i, 'endTime', $any($event.target).value)" />
+            <ul class="appt-list">
+              @for (a of appointments(); track a.id) {
+                <li class="appt-row">
+                  <div class="appt-main">
+                    <div class="appt-customer">{{ a.customer_name }}</div>
+                    <div class="appt-meta">{{ a.customer_email }}</div>
+                    @if (a.employee_name) {
+                      <div class="appt-meta">Staff: {{ a.employee_name }}</div>
+                    }
+                    @if (a.service_name) {
+                      <div class="appt-meta">Service: {{ a.service_name }}</div>
+                    }
+                    @if (a.notes) {
+                      <div class="appt-notes">{{ a.notes }}</div>
+                    }
                   </div>
-                } @else {
-                  <span class="day-status">Closed</span>
+                  <div class="appt-right">
+                    <div class="appt-date">{{ a.starts_at | date:'MMM d, y' }}</div>
+                    <div class="appt-time">{{ a.starts_at | date:'h:mm a' }}</div>
+                    <span class="appt-status {{ 'status-' + a.status }}">{{ a.status }}</span>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+
+      <!-- ─── STAFF ────────────────────────────────────────── -->
+      @if (activeTab() === 'staff') {
+        <section class="card-block">
+          <header class="block-head">
+            <h2>Services</h2>
+            <p>What you offer — name, duration, and (optional) price.</p>
+          </header>
+
+          @if (services().length === 0) {
+            <div class="empty-row">No services yet. Add your first one below.</div>
+          } @else {
+            <ul class="row-list">
+              @for (s of services(); track s.id) {
+                <li class="row">
+                  <div class="row-main">
+                    <div class="row-name">{{ s.name }}</div>
+                    @if (s.description) {
+                      <div class="row-desc">{{ s.description }}</div>
+                    }
+                  </div>
+                  <div class="row-meta">
+                    <span>{{ s.duration_minutes }} min</span>
+                    @if (s.price_cents !== null) {
+                      <span>${{ s.price_cents / 100 | number:'1.2-2' }}</span>
+                    }
+                  </div>
+                  <button class="row-delete" type="button" (click)="removeService(s)">Delete</button>
+                </li>
+              }
+            </ul>
+          }
+
+          <form class="inline-form" [formGroup]="serviceForm" (ngSubmit)="addService()" novalidate>
+            <div class="grid-4">
+              <input type="text" formControlName="name" placeholder="Service name (e.g. Haircut)" />
+              <input type="number" formControlName="durationMinutes" min="5" step="5" placeholder="Minutes" />
+              <input type="number" formControlName="priceCents" min="0" step="100" placeholder="Price (cents)" />
+              <input type="text" formControlName="description" placeholder="Description (optional)" />
+            </div>
+            <button type="submit" class="btn-add">+ Add service</button>
+          </form>
+          @if (serviceError()) {
+            <div class="form-error">{{ serviceError() }}</div>
+          }
+        </section>
+
+        <section class="card-block">
+          <header class="block-head">
+            <h2>Staff</h2>
+            <p>Each staff member gets their own schedule below.</p>
+          </header>
+
+          @if (employees().length === 0) {
+            <div class="empty-row">No staff yet. Add yourself or your team below.</div>
+          } @else {
+            <ul class="row-list">
+              @for (e of employees(); track e.id) {
+                <li class="row" [class.selected]="e.id === selectedEmployeeId()">
+                  <div class="row-main">
+                    <div class="row-name">{{ e.name }}</div>
+                    @if (e.email) {
+                      <div class="row-desc">{{ e.email }}</div>
+                    }
+                  </div>
+                  <div class="row-actions">
+                    <button class="row-select" type="button" (click)="selectEmployee(e.id)">
+                      {{ e.id === selectedEmployeeId() ? 'Editing hours' : 'Edit hours' }}
+                    </button>
+                    <button class="row-delete" type="button" (click)="removeEmployee(e)">Delete</button>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+
+          <form class="inline-form" [formGroup]="employeeForm" (ngSubmit)="addEmployee()" novalidate>
+            <div class="grid-2">
+              <input type="text" formControlName="name" placeholder="Staff name (e.g. Maria Chen)" />
+              <input type="email" formControlName="email" placeholder="Email (optional)" />
+            </div>
+            <button type="submit" class="btn-add">+ Add staff</button>
+          </form>
+          @if (employeeError()) {
+            <div class="form-error">{{ employeeError() }}</div>
+          }
+        </section>
+
+        <section class="card-block">
+          <header class="block-head">
+            <h2>Working hours</h2>
+            @if (selectedEmployee(); as emp) {
+              <p>Weekly schedule for <strong>{{ emp.name }}</strong>.</p>
+            } @else {
+              <p>Add a staff member above to set their schedule.</p>
+            }
+          </header>
+
+          @if (selectedEmployee()) {
+            <div class="hours-grid">
+              @for (day of daysGrid(); track day.dayOfWeek; let i = $index) {
+                <div class="hour-row" [class.closed]="!day.open">
+                  <button type="button" class="day-toggle" (click)="toggleDay(i)">
+                    <span class="day-checkbox" [class.checked]="day.open">
+                      @if (day.open) { ✓ }
+                    </span>
+                    <span class="day-label">{{ day.label }}</span>
+                  </button>
+
+                  @if (day.open) {
+                    <div class="time-inputs">
+                      <input type="time" [value]="day.startTime"
+                             (change)="updateTime(i, 'startTime', $any($event.target).value)" />
+                      <span class="time-sep">→</span>
+                      <input type="time" [value]="day.endTime"
+                             (change)="updateTime(i, 'endTime', $any($event.target).value)" />
+                    </div>
+                  } @else {
+                    <span class="day-status">Closed</span>
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="hours-actions">
+              <button type="button" class="btn-save" (click)="saveHours()" [disabled]="hoursSaving()">
+                {{ hoursSaving() ? 'Saving…' : 'Save hours' }}
+              </button>
+              @if (hoursSaved()) {
+                <span class="saved-msg">Saved ✓</span>
+              }
+            </div>
+
+            @if (hoursError()) {
+              <div class="form-error">{{ hoursError() }}</div>
+            }
+          }
+        </section>
+      }
+
+      <!-- ─── SETTINGS ─────────────────────────────────────── -->
+      @if (activeTab() === 'settings') {
+        <section class="card-block">
+          <header class="block-head">
+            <h2>Business settings</h2>
+            <p>Timezone and appointment slot length for {{ b.name }}.</p>
+          </header>
+
+          <form class="settings-form" [formGroup]="settingsForm" (ngSubmit)="saveSettings()" novalidate>
+            <label class="settings-field">
+              <span class="settings-label">Timezone</span>
+              <input
+                type="text"
+                formControlName="timezone"
+                placeholder="e.g. America/New_York"
+                [class.invalid]="settingsForm.controls.timezone.touched && settingsForm.controls.timezone.invalid"
+              />
+              <span class="settings-hint">IANA timezone name — e.g. <code>Europe/Paris</code>, <code>Asia/Tokyo</code></span>
+            </label>
+
+            <label class="settings-field">
+              <span class="settings-label">Slot duration (minutes)</span>
+              <input
+                type="number"
+                formControlName="slotDurationMinutes"
+                min="5"
+                step="5"
+                [class.invalid]="settingsForm.controls.slotDurationMinutes.touched && settingsForm.controls.slotDurationMinutes.invalid"
+              />
+              <span class="settings-hint">How long each booking slot is shown on the calendar (e.g. 30 or 60).</span>
+            </label>
+
+            @if (settingsError()) {
+              <div class="form-error">{{ settingsError() }}</div>
+            }
+
+            <div class="hours-actions">
+              <button type="submit" class="btn-save" [disabled]="settingsSaving()">
+                {{ settingsSaving() ? 'Saving…' : 'Save settings' }}
+              </button>
+              @if (settingsSaved()) {
+                <span class="saved-msg">Saved ✓</span>
+              }
+            </div>
+          </form>
+        </section>
+      }
+
+      <!-- ─── PLANS ─────────────────────────────────────────── -->
+      @if (activeTab() === 'plans') {
+        <section class="card-block">
+          <header class="block-head">
+            <h2>Subscription plan</h2>
+            <p>Currently on <strong>{{ b.plan_type }}</strong>. Select a plan below to switch.</p>
+          </header>
+
+          <div class="plan-cards">
+            @for (plan of plans(); track plan.id) {
+              <button
+                type="button"
+                class="plan-card"
+                [class.selected]="plan.id === selectedPlanId()"
+                [class.current]="plan.type === b.plan_type"
+                (click)="selectPlan(plan.id)"
+              >
+                @if (plan.featured) {
+                  <span class="plan-popular">Most popular</span>
                 }
+                <div class="plan-type">{{ plan.type }}</div>
+                <div class="plan-price">${{ plan.price }}<span class="plan-period">/mo</span></div>
+                <p class="plan-desc">{{ plan.description }}</p>
+                <ul class="plan-features">
+                  @for (f of plan.features; track f) {
+                    <li>{{ f }}</li>
+                  }
+                </ul>
+                @if (plan.type === b.plan_type) {
+                  <span class="plan-current-badge">Current plan</span>
+                }
+              </button>
+            }
+          </div>
+
+          @if (planError()) {
+            <div class="form-error">{{ planError() }}</div>
+          }
+
+          <div class="hours-actions">
+            <button
+              type="button"
+              class="btn-save"
+              [disabled]="planSaving() || isPlanUnchanged()"
+              (click)="confirmPlanChange()"
+            >
+              {{ planSaving() ? 'Switching…' : 'Switch to selected plan' }}
+            </button>
+            @if (planSaved()) {
+              <span class="saved-msg">Plan updated ✓</span>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- ─── BILLING ───────────────────────────────────────── -->
+      @if (activeTab() === 'billing') {
+        <section class="card-block">
+          <header class="block-head">
+            <h2>Payment history</h2>
+            <p>Charges and invoices for {{ b.name }}.</p>
+          </header>
+
+          <div class="billing-meta">
+            <div class="billing-row">
+              <span class="billing-label">Subscription status</span>
+              <span class="sub-badge sub-{{ b.subscription_status }}">{{ b.subscription_status }}</span>
+            </div>
+            <div class="billing-row">
+              <span class="billing-label">Current plan</span>
+              <span>{{ b.plan_type }}</span>
+            </div>
+            @if (b.trial_ends_at) {
+              <div class="billing-row">
+                <span class="billing-label">Trial ends</span>
+                <span>{{ b.trial_ends_at | date:'MMM d, y' }}</span>
               </div>
             }
           </div>
 
-          <div class="hours-actions">
-            <button type="button" class="btn-save" (click)="saveHours()" [disabled]="hoursSaving()">
-              {{ hoursSaving() ? 'Saving…' : 'Save hours' }}
-            </button>
-            @if (hoursSaved()) {
-              <span class="saved-msg">Saved ✓</span>
-            }
+          <div class="empty-row" style="margin-top: var(--space-5)">
+            No payment history yet. Invoices will appear here once your subscription is active.
           </div>
-
-          @if (hoursError()) {
-            <div class="form-error">{{ hoursError() }}</div>
-          }
-        }
-      </section>
+        </section>
+      }
     }
   </div>
 </section>

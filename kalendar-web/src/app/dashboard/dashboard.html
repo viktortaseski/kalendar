@@ -32,7 +32,7 @@
         </header>
         <div class="biz-list">
           @for (b of myBusinesses(); track b.id) {
-            <a class="biz-row" [routerLink]="['/businesses', b.slug]">
+            <a class="biz-row" [routerLink]="['/businesses', b.slug, 'manage']">
               <div>
                 <div class="biz-name">{{ b.name }}</div>
                 @if (b.description) {

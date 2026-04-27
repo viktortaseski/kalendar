@@ -99,8 +99,8 @@ businesses.get('/mine/list', requireAuth, async (req, res) => {
 businesses.get('/:slug', async (req, res) => {
   try {
     const isId = /^\d+$/.test(req.params.slug);
-    const result = await db.query(
-      `SELECT b.id, b.name, b.slug, b.description, b.timezone, b.slot_duration_minutes, b.owner_id,
+    const result = await db.query(`SELECT b.id, b.name, b.slug, b.description, b.timezone, b.slot_duration_minutes,
+              b.owner_id, b.subscription_status, b.trial_ends_at,
               p.type AS plan_type
        FROM businesses b JOIN plans p ON p.id = b.plan_id
        WHERE ${isId ? 'b.id = $1' : 'b.slug = $1'} AND b.active = true`,
@@ -540,6 +540,82 @@ businesses.post('/:slug/appointments', tryAuth, async (req, res) => {
   } catch (err) {
     console.error('POST appointment failed:', err);
     res.status(500).json({ error: err.message || 'Failed to create appointment' });
+  }
+});
+
+// GET /:slug/appointments — owner only, all bookings for this business
+businesses.get('/:slug/appointments', requireAuth, async (req, res) => {
+  try {
+    const r = await loadBySlug(req.params.slug, true, req.user.sub);
+    if (r.error) return res.status(r.status).json({ error: r.error });
+
+    const result = await db.query(
+      `SELECT a.id, a.customer_name, a.customer_email, a.customer_phone,
+              a.starts_at, a.ends_at, a.status, a.notes,
+              e.name AS employee_name, s.name AS service_name
+       FROM appointments a
+       LEFT JOIN employees e ON e.id = a.employee_id
+       LEFT JOIN services  s ON s.id = a.service_id
+       WHERE a.business_id = $1
+       ORDER BY a.starts_at DESC`,
+      [r.business.id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('GET business appointments failed:', err);
+    res.status(500).json({ error: err.message || 'Failed to fetch appointments' });
+  }
+});
+
+// PUT /:slug/settings — owner only, update timezone / slot duration
+businesses.put('/:slug/settings', requireAuth, async (req, res) => {
+  try {
+    const r = await loadBySlug(req.params.slug, true, req.user.sub);
+    if (r.error) return res.status(r.status).json({ error: r.error });
+
+    const { timezone, slotDurationMinutes } = req.body || {};
+    const tz   = timezone ? safeTz(timezone) : null;
+    const slot = slotDurationMinutes ? Number(slotDurationMinutes) : null;
+    if (slot !== null && slot < 5) {
+      return res.status(400).json({ error: 'slotDurationMinutes must be at least 5' });
+    }
+
+    const result = await db.query(
+      `UPDATE businesses
+       SET timezone              = COALESCE($1, timezone),
+           slot_duration_minutes = COALESCE($2, slot_duration_minutes),
+           updated_at            = NOW()
+       WHERE id = $3
+       RETURNING timezone, slot_duration_minutes`,
+      [tz, slot, r.business.id]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('PUT business settings failed:', err);
+    res.status(500).json({ error: err.message || 'Failed to update settings' });
+  }
+});
+
+// PUT /:slug/plan — owner only, switch subscription plan
+businesses.put('/:slug/plan', requireAuth, async (req, res) => {
+  try {
+    const r = await loadBySlug(req.params.slug, true, req.user.sub);
+    if (r.error) return res.status(r.status).json({ error: r.error });
+
+    const { planId } = req.body || {};
+    if (!planId) return res.status(400).json({ error: 'planId is required' });
+
+    const planCheck = await db.query('SELECT id FROM plans WHERE id = $1', [planId]);
+    if (planCheck.rowCount === 0) return res.status(404).json({ error: 'Plan not found' });
+
+    const result = await db.query(
+      `UPDATE businesses SET plan_id = $1, updated_at = NOW() WHERE id = $2 RETURNING plan_id`,
+      [planId, r.business.id]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('PUT business plan failed:', err);
+    res.status(500).json({ error: err.message || 'Failed to update plan' });
   }
 });
 

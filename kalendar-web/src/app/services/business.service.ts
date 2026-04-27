@@ -15,6 +15,21 @@ export interface BusinessDetail extends BusinessSummary {
   slot_duration_minutes: number;
   plan_type: string;
   owner_id: number;
+  subscription_status: string;
+  trial_ends_at: string | null;
+}
+
+export interface BusinessAppointment {
+  id: number;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string | null;
+  employee_name: string | null;
+  service_name: string | null;
+  starts_at: string;
+  ends_at: string;
+  status: string;
+  notes: string | null;
 }
 
 export interface MyBusiness extends BusinessSummary {
@@ -138,6 +153,25 @@ export class BusinessService {
       `${this.base}/${slug}/appointments`,
       payload,
     );
+  }
+
+  // Business management (owner-only)
+  getBusinessAppointments(slug: string): Observable<BusinessAppointment[]> {
+    return this.http.get<BusinessAppointment[]>(`${this.base}/${slug}/appointments`);
+  }
+
+  updateSettings(
+    slug: string,
+    payload: { timezone?: string; slotDurationMinutes?: number },
+  ): Observable<{ timezone: string; slot_duration_minutes: number }> {
+    return this.http.put<{ timezone: string; slot_duration_minutes: number }>(
+      `${this.base}/${slug}/settings`,
+      payload,
+    );
+  }
+
+  changePlan(slug: string, planId: number): Observable<{ plan_id: number }> {
+    return this.http.put<{ plan_id: number }>(`${this.base}/${slug}/plan`, { planId });
   }
 
   // Working hours
