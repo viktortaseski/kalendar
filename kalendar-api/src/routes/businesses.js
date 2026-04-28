@@ -89,14 +89,14 @@ businesses.get('/', async (req, res) => {
     const q = (req.query.q || '').toString().trim();
     const result = q
       ? await db.query(
-          `SELECT id, name, slug, description, timezone
+          `SELECT id, name, slug, description, timezone, logo_url, banner_url
            FROM businesses
            WHERE active = true AND (name ILIKE $1 OR description ILIKE $1)
            ORDER BY name ASC LIMIT 50`,
           [`%${q}%`]
         )
       : await db.query(
-          `SELECT id, name, slug, description, timezone
+          `SELECT id, name, slug, description, timezone, logo_url, banner_url
            FROM businesses WHERE active = true
            ORDER BY created_at DESC LIMIT 50`
         );
@@ -111,7 +111,7 @@ businesses.get('/', async (req, res) => {
 businesses.get('/mine/list', requireAuth, async (req, res) => {
   try {
     const result = await db.query(
-      `SELECT id, name, slug, description, subscription_status
+      `SELECT id, name, slug, description, timezone, logo_url, banner_url, subscription_status
        FROM businesses WHERE owner_id = $1
        ORDER BY created_at DESC`,
       [req.user.sub]
@@ -131,8 +131,10 @@ businesses.get('/jobs/list', requireAuth, async (req, res) => {
               b.slug        AS business_slug,
               b.name        AS business_name,
               b.timezone    AS business_timezone,
+              b.logo_url    AS business_logo_url,
               e.id          AS employee_id,
-              e.name        AS employee_name
+              e.name        AS employee_name,
+              e.avatar_url  AS employee_avatar_url
        FROM employees e
        JOIN businesses b ON b.id = e.business_id
        WHERE b.active = true
@@ -154,6 +156,7 @@ businesses.get('/:slug', async (req, res) => {
     const isId = /^\d+$/.test(req.params.slug);
     const result = await db.query(`SELECT b.id, b.name, b.slug, b.description, b.timezone, b.slot_duration_minutes,
               b.owner_id, b.subscription_status, b.trial_ends_at,
+              b.logo_url, b.banner_url,
               p.type AS plan_type
        FROM businesses b JOIN plans p ON p.id = b.plan_id
        WHERE ${isId ? 'b.id = $1' : 'b.slug = $1'} AND b.active = true`,
@@ -190,7 +193,7 @@ businesses.post('/', requireAuth, async (req, res) => {
       `INSERT INTO businesses
          (owner_id, plan_id, name, slug, description, timezone, slot_duration_minutes)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id, name, slug, description, timezone, slot_duration_minutes, owner_id`,
+       RETURNING id, name, slug, description, timezone, slot_duration_minutes, owner_id, logo_url, banner_url`,
       [req.user.sub, planId, name, slug, description || null, timezone || 'UTC', slotDurationMinutes || 30]
     );
     res.status(201).json(insert.rows[0]);
@@ -209,7 +212,7 @@ businesses.get('/:slug/services', async (req, res) => {
     if (r.error) return res.status(r.status).json({ error: r.error });
 
     const result = await db.query(
-      `SELECT id, name, duration_minutes, price, description, active
+      `SELECT id, name, duration_minutes, price, description, active, image_url
        FROM services WHERE business_id = $1
        ORDER BY active DESC, name ASC`,
       [r.business.id]
@@ -241,7 +244,7 @@ businesses.post('/:slug/services', requireAuth, async (req, res) => {
     const insert = await db.query(
       `INSERT INTO services (business_id, name, duration_minutes, price, description)
        VALUES ($1, $2, $3, $4, $5)
-       RETURNING id, name, duration_minutes, price, description, active`,
+       RETURNING id, name, duration_minutes, price, description, active, image_url`,
       [r.business.id, name, durationMinutes, price ?? null, description || null]
     );
     res.status(201).json(insert.rows[0]);
@@ -278,7 +281,7 @@ businesses.get('/:slug/employees', async (req, res) => {
     if (r.error) return res.status(r.status).json({ error: r.error });
 
     const result = await db.query(
-      `SELECT id, name, email, active
+      `SELECT id, name, email, active, avatar_url
        FROM employees WHERE business_id = $1
        ORDER BY active DESC, name ASC`,
       [r.business.id]
@@ -302,7 +305,7 @@ businesses.post('/:slug/employees', requireAuth, async (req, res) => {
     const insert = await db.query(
       `INSERT INTO employees (business_id, name, email)
        VALUES ($1, $2, $3)
-       RETURNING id, name, email, active`,
+       RETURNING id, name, email, active, avatar_url`,
       [r.business.id, name, email || null]
     );
     res.status(201).json(insert.rows[0]);
@@ -338,7 +341,7 @@ businesses.get('/:slug/staff', async (req, res) => {
 
     const result = await db.query(
       `SELECT
-         e.id, e.name, e.email, e.active,
+         e.id, e.name, e.email, e.active, e.avatar_url,
          COALESCE(
            json_agg(
              json_build_object(
