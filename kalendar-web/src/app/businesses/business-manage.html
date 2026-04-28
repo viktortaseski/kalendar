@@ -29,6 +29,9 @@
         <button class="tab" [class.active]="activeTab() === 'billing'" (click)="setTab('billing')">
           Billing
         </button>
+        <a class="tab" [routerLink]="['/businesses', b.slug]">
+          Landing page
+        </a>
       </nav>
 
       <!-- ─── APPOINTMENTS ────────────────────────────────── -->
