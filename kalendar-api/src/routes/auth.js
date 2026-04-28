@@ -46,7 +46,7 @@ auth.post('/register', async (req, res) => {
     const insert = await db.query(
       `INSERT INTO users (email, password_hash, full_name, phone)
        VALUES ($1, $2, $3, $4)
-       RETURNING id, email, full_name, phone`,
+       RETURNING id, email, full_name, phone, avatar_url`,
       [email, passwordHash, fullName, phone || null]
     );
 
@@ -68,7 +68,7 @@ auth.post('/login', async (req, res) => {
     }
 
     const result = await db.query(
-      'SELECT id, email, full_name, phone, password_hash FROM users WHERE email = $1',
+      'SELECT id, email, full_name, phone, avatar_url, password_hash FROM users WHERE email = $1',
       [email]
     );
     if (result.rowCount === 0) {
@@ -92,7 +92,7 @@ auth.post('/login', async (req, res) => {
 auth.get('/me', requireAuth, async (req, res) => {
   try {
     const result = await db.query(
-      'SELECT id, email, full_name, phone FROM users WHERE id = $1',
+      'SELECT id, email, full_name, phone, avatar_url FROM users WHERE id = $1',
       [req.user.sub]
     );
     if (result.rowCount === 0) {
