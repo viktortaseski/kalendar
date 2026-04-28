@@ -88,6 +88,13 @@
             <ul class="row-list">
               @for (s of services(); track s.id) {
                 <li class="row">
+                  <span class="thumb-img">
+                    @if (s.image_url) {
+                      <img [src]="s.image_url" [alt]="s.name" />
+                    } @else {
+                      ✂
+                    }
+                  </span>
                   <div class="row-main">
                     <div class="row-name">{{ s.name }}</div>
                     @if (s.description) {
@@ -132,6 +139,13 @@
             <ul class="row-list">
               @for (e of employees(); track e.id) {
                 <li class="row" [class.selected]="e.id === selectedEmployeeId()">
+                  <span class="avatar avatar-md">
+                    @if (e.avatar_url) {
+                      <img [src]="e.avatar_url" [alt]="e.name" />
+                    } @else {
+                      {{ e.name.charAt(0).toUpperCase() }}
+                    }
+                  </span>
                   <div class="row-main">
                     <div class="row-name">{{ e.name }}</div>
                     @if (e.email) {
@@ -261,6 +275,41 @@
 
       <!-- ─── SETTINGS ─────────────────────────────────────── -->
       @if (activeTab() === 'settings') {
+        <section class="card-block">
+          <header class="block-head">
+            <h2>Brand assets</h2>
+            <p>Logo and banner for your public booking page. Upload coming soon.</p>
+          </header>
+
+          <div class="brand-grid">
+            <div class="brand-field">
+              <span class="settings-label">Logo</span>
+              <div class="brand-logo-preview">
+                <span class="logo-mark-img logo-mark-lg">
+                  @if (b.logo_url) {
+                    <img [src]="b.logo_url" [alt]="b.name + ' logo'" />
+                  } @else {
+                    {{ b.name.charAt(0).toUpperCase() }}
+                  }
+                </span>
+                <button type="button" class="btn-secondary" disabled>Upload logo</button>
+              </div>
+              <span class="settings-hint">Square. Shown in lists, sidebar, and your booking page header.</span>
+            </div>
+
+            <div class="brand-field">
+              <span class="settings-label">Banner</span>
+              <div class="brand-banner-preview banner-img" [class.empty]="!b.banner_url">
+                @if (b.banner_url) {
+                  <img [src]="b.banner_url" [alt]="b.name + ' banner'" />
+                }
+              </div>
+              <button type="button" class="btn-secondary" disabled>Upload banner</button>
+              <span class="settings-hint">Wide hero image at the top of your public business page.</span>
+            </div>
+          </div>
+        </section>
+
         <section class="card-block">
           <header class="block-head">
             <h2>Business settings</h2>

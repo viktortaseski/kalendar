@@ -33,11 +33,27 @@
       <div class="biz-grid">
         @for (b of results(); track b.id) {
           <a class="biz-card" [routerLink]="['/businesses', b.slug]">
-            <h3>{{ b.name }}</h3>
-            @if (b.description) {
-              <p>{{ b.description }}</p>
-            }
-            <span class="biz-meta">{{ b.timezone }} · /{{ b.slug }}</span>
+            <div class="biz-card-banner banner-img" [class.empty]="!b.banner_url">
+              @if (b.banner_url) {
+                <img [src]="b.banner_url" [alt]="b.name + ' banner'" />
+              }
+            </div>
+            <div class="biz-card-body">
+              <span class="logo-mark-img logo-mark-md">
+                @if (b.logo_url) {
+                  <img [src]="b.logo_url" [alt]="b.name + ' logo'" />
+                } @else {
+                  {{ b.name.charAt(0).toUpperCase() }}
+                }
+              </span>
+              <div class="biz-card-text">
+                <h3>{{ b.name }}</h3>
+                @if (b.description) {
+                  <p>{{ b.description }}</p>
+                }
+                <span class="biz-meta">{{ b.timezone }} · /{{ b.slug }}</span>
+              </div>
+            </div>
           </a>
         }
       </div>

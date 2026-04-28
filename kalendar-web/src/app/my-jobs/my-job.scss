@@ -30,6 +30,12 @@
 
 .saved-msg { font-size: 13px; color: var(--color-accent); font-weight: 500; }
 
+.job-head-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
 .past-toggle-row {
   display: flex;
   justify-content: center;

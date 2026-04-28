@@ -33,11 +33,20 @@
         <div class="biz-list">
           @for (b of myBusinesses(); track b.id) {
             <a class="biz-row" [routerLink]="['/businesses', b.slug, 'manage']">
-              <div>
-                <div class="biz-name">{{ b.name }}</div>
-                @if (b.description) {
-                  <div class="biz-desc">{{ b.description }}</div>
-                }
+              <div class="biz-row-main">
+                <span class="logo-mark-img logo-mark-md">
+                  @if (b.logo_url) {
+                    <img [src]="b.logo_url" [alt]="b.name" />
+                  } @else {
+                    {{ b.name.charAt(0).toUpperCase() }}
+                  }
+                </span>
+                <div>
+                  <div class="biz-name">{{ b.name }}</div>
+                  @if (b.description) {
+                    <div class="biz-desc">{{ b.description }}</div>
+                  }
+                </div>
               </div>
               <span class="biz-status">{{ b.subscription_status }}</span>
             </a>

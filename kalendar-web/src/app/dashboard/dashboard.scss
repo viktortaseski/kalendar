@@ -139,6 +139,13 @@
   }
 }
 
+.biz-row-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
 .biz-name {
   font-size: 16px;
   font-weight: 600;

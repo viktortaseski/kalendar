@@ -484,3 +484,90 @@ em {
 @media (max-width: 600px) {
   .hour-row { flex-wrap: wrap; }
 }
+
+/* ─── Image placeholders ─────────────────────────────────── */
+/* Avatar (round): use for users + employees. Add .avatar-sm/lg for size. */
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 18px;
+  flex-shrink: 0;
+  overflow: hidden;
+  user-select: none;
+
+  img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  &.avatar-sm { width: 22px; height: 22px; font-size: 11px; }
+  &.avatar-md { width: 34px; height: 34px; font-size: 14px; }
+  &.avatar-lg { width: 64px; height: 64px; font-size: 24px; }
+}
+
+/* Square logo mark (for businesses). Sized via modifier classes. */
+.logo-mark-img {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--color-warm);
+  color: var(--color-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 18px;
+  flex-shrink: 0;
+  overflow: hidden;
+  user-select: none;
+
+  img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  &.logo-mark-sm { width: 22px; height: 22px; font-size: 11px; border-radius: 6px; }
+  &.logo-mark-md { width: 36px; height: 36px; font-size: 15px; }
+  &.logo-mark-lg { width: 72px; height: 72px; font-size: 28px; border-radius: var(--radius-lg); }
+}
+
+/* Wide banner placeholder. Used at the top of business detail pages. */
+.banner-img {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 1;
+  background: linear-gradient(135deg, var(--color-warm), var(--color-accent-soft));
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  display: block;
+
+  img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  &.empty::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(15, 76, 58, 0.12), transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(15, 76, 58, 0.08), transparent 50%);
+    pointer-events: none;
+  }
+}
+
+/* Generic thumbnail (e.g. service image). */
+.thumb-img {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  background: var(--color-warm);
+  color: var(--color-ink-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+  overflow: hidden;
+
+  img { width: 100%; height: 100%; object-fit: cover; display: block; }
+}

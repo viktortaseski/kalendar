@@ -9,6 +9,8 @@ export interface BusinessSummary {
   slug: string;
   description: string | null;
   timezone: string;
+  logo_url: string | null;
+  banner_url: string | null;
 }
 
 export interface BusinessDetail extends BusinessSummary {
@@ -41,8 +43,10 @@ export interface MyJob {
   business_slug: string;
   business_name: string;
   business_timezone: string;
+  business_logo_url: string | null;
   employee_id: number;
   employee_name: string;
+  employee_avatar_url: string | null;
 }
 
 export interface UnavailabilityBlock {
@@ -59,6 +63,7 @@ export interface Service {
   price_cents: number | null;
   description: string | null;
   active: boolean;
+  image_url: string | null;
 }
 
 export interface Employee {
@@ -66,6 +71,7 @@ export interface Employee {
   name: string;
   email: string | null;
   active: boolean;
+  avatar_url: string | null;
 }
 
 export interface WorkingHourRow {

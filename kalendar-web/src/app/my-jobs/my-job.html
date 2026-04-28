@@ -9,8 +9,19 @@
 
       <header class="page-head">
         <span class="eyebrow"><span class="dot"></span> My job</span>
-        <h1 class="page-title">{{ j.business_name }}</h1>
-        <p class="page-sub">You're listed as <strong>{{ j.employee_name }}</strong>. Set your own schedule and time off here.</p>
+        <div class="job-head-row">
+          <span class="logo-mark-img logo-mark-lg">
+            @if (j.business_logo_url) {
+              <img [src]="j.business_logo_url" [alt]="j.business_name" />
+            } @else {
+              {{ j.business_name.charAt(0).toUpperCase() }}
+            }
+          </span>
+          <div>
+            <h1 class="page-title">{{ j.business_name }}</h1>
+            <p class="page-sub">You're listed as <strong>{{ j.employee_name }}</strong>. Set your own schedule and time off here.</p>
+          </div>
+        </div>
       </header>
 
       <!-- ─── APPOINTMENTS ────────────────────────────────── -->

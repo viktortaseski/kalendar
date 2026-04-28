@@ -10,14 +10,29 @@
     } @else if (business(); as b) {
       <a routerLink="/businesses" class="back-link">← All businesses</a>
 
+      <div class="biz-banner banner-img" [class.empty]="!b.banner_url">
+        @if (b.banner_url) {
+          <img [src]="b.banner_url" [alt]="b.name + ' banner'" />
+        }
+      </div>
+
       <header class="biz-header">
         <div class="biz-header-top">
-          <span class="plan-pill">{{ b.plan_type }}</span>
-          @if (isOwner()) {
-            <a [routerLink]="['/businesses', b.slug, 'manage']" class="manage-btn">
-              Manage business →
-            </a>
-          }
+          <span class="logo-mark-img logo-mark-lg biz-logo">
+            @if (b.logo_url) {
+              <img [src]="b.logo_url" [alt]="b.name + ' logo'" />
+            } @else {
+              {{ b.name.charAt(0).toUpperCase() }}
+            }
+          </span>
+          <div class="biz-header-meta">
+            <span class="plan-pill">{{ b.plan_type }}</span>
+            @if (isOwner()) {
+              <a [routerLink]="['/businesses', b.slug, 'manage']" class="manage-btn">
+                Manage business →
+              </a>
+            }
+          </div>
         </div>
         <h1 class="biz-name">{{ b.name }}</h1>
         @if (b.description) {
@@ -40,7 +55,13 @@
             @for (member of staff(); track member.id) {
               <article class="staff-card">
                 <header class="staff-head">
-                  <div class="staff-avatar">{{ member.name.charAt(0) }}</div>
+                  <span class="avatar avatar-lg">
+                    @if (member.avatar_url) {
+                      <img [src]="member.avatar_url" [alt]="member.name" />
+                    } @else {
+                      {{ member.name.charAt(0).toUpperCase() }}
+                    }
+                  </span>
                   <div>
                     <div class="staff-name">{{ member.name }}</div>
                     @if (member.email) {
@@ -93,8 +114,18 @@
 
         <div class="bm-header">
           <span class="bm-title">
-            @if (bookingStep() === 'done') { Appointment confirmed }
-            @else { Book with {{ member.name }} }
+            @if (bookingStep() === 'done') {
+              <span>Appointment confirmed</span>
+            } @else {
+              <span class="avatar avatar-md">
+                @if (member.avatar_url) {
+                  <img [src]="member.avatar_url" [alt]="member.name" />
+                } @else {
+                  {{ member.name.charAt(0).toUpperCase() }}
+                }
+              </span>
+              <span>Book with {{ member.name }}</span>
+            }
           </span>
           <button class="bm-close" (click)="closeBooking()">✕</button>
         </div>

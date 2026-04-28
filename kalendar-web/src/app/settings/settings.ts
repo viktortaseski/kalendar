@@ -11,6 +11,16 @@ import { AuthService } from '../services/auth.service';
         @if (auth.currentUser(); as u) {
           <section class="card">
             <h2 class="card-title">Account</h2>
+            <div class="account-head">
+              <span class="avatar avatar-lg">
+                @if (u.avatarUrl) {
+                  <img [src]="u.avatarUrl" [alt]="u.fullName" />
+                } @else {
+                  {{ u.fullName.charAt(0).toUpperCase() }}
+                }
+              </span>
+              <button type="button" class="btn-secondary" disabled>Upload photo</button>
+            </div>
             <div class="row">
               <span class="label">Full name</span>
               <span class="value">{{ u.fullName }}</span>
@@ -52,6 +62,14 @@ import { AuthService } from '../services/auth.service';
       font-weight: 600;
       margin-bottom: var(--space-4);
       letter-spacing: -0.01em;
+    }
+    .account-head {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding-bottom: var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: var(--space-2);
     }
     .row {
       display: flex;
