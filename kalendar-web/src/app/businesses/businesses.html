@@ -39,13 +39,6 @@
               }
             </div>
             <div class="biz-card-body">
-              <span class="logo-mark-img logo-mark-md">
-                @if (b.logo_url) {
-                  <img [src]="b.logo_url" [alt]="b.name + ' logo'" />
-                } @else {
-                  {{ b.name.charAt(0).toUpperCase() }}
-                }
-              </span>
               <div class="biz-card-text">
                 <h3>{{ b.name }}</h3>
                 @if (b.description) {
