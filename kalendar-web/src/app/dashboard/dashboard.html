@@ -1,58 +1,156 @@
 <section class="dashboard">
   <div class="container">
+
     <header class="dash-head">
-      <span class="eyebrow"><span class="dot"></span> Dashboard</span>
-      <h1 class="dash-title">
-        Welcome, <em>{{ auth.currentUser()?.fullName }}</em>.
-      </h1>
-      <p class="dash-sub">What would you like to do today?</p>
+      <span class="eyebrow"><span class="dot"></span> {{ todayLabel() }}</span>
+      <h1 class="dash-title">Welcome, <em>{{ auth.currentUser()?.fullName }}</em>.</h1>
     </header>
 
-    <div class="action-grid">
-      <a routerLink="/businesses" class="action-card">
-        <div class="action-icon">🔍</div>
-        <h2>Browse businesses</h2>
-        <p>Find a salon, clinic, or studio and book an appointment online.</p>
-        <span class="action-arrow">→</span>
+    <div class="stats-grid">
+      <a routerLink="/inbox" class="stat-card">
+        <span class="stat-num">{{ notifications.unreadCount() }}</span>
+        <span class="stat-label">Unread in inbox</span>
       </a>
-
-      <a routerLink="/businesses/new" class="action-card featured">
-        <div class="action-icon">✨</div>
-        <h2>Start your business</h2>
-        <p>Pick a plan, set up your calendar, and start taking online bookings.</p>
-        <span class="action-arrow">→</span>
-      </a>
+      @if (hasWorkplaces()) {
+        <div class="stat-card">
+          <span class="stat-num">{{ todayCount() }}</span>
+          <span class="stat-label">Today's bookings</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">{{ workplaceCount() }}</span>
+          <span class="stat-label">Workplaces</span>
+        </div>
+      } @else {
+        <a routerLink="/my-appointments" class="stat-card">
+          <span class="stat-num">{{ nextCustomerBooking() ? '1+' : '0' }}</span>
+          <span class="stat-label">Upcoming bookings</span>
+        </a>
+      }
     </div>
 
-    @if (myBusinesses().length > 0) {
-      <section class="my-businesses">
-        <header class="section-head-left">
-          <span class="eyebrow"><span class="dot"></span> Your businesses</span>
-          <h2>Manage your businesses</h2>
+    @if (hasWorkplaces()) {
+      <section class="dash-section">
+        <header class="dash-section-head">
+          <h2>Today's schedule</h2>
         </header>
-        <div class="biz-list">
+        @if (todayAppointments().length === 0) {
+          <div class="empty-state">Nothing on your plate today. Enjoy the breather.</div>
+        } @else {
+          <ul class="today-list">
+            @for (a of todayAppointments(); track a.id) {
+              <li class="today-row">
+                <a class="today-link-wrap" [routerLink]="a.link">
+                  <div class="today-time">
+                    <div class="today-time-start">{{ a.starts_at | date:'h:mm a' }}</div>
+                    <div class="today-time-end">→ {{ a.ends_at | date:'h:mm a' }}</div>
+                  </div>
+                  <div class="today-main">
+                    <div class="today-customer">{{ a.customer_name }}</div>
+                    <div class="today-meta">
+                      <span class="today-biz">{{ a.business_name }}</span>
+                      @if (a.service_name) {
+                        <span class="today-sep">·</span>
+                        <span>{{ a.service_name }}</span>
+                      }
+                      @if (a.employee_name) {
+                        <span class="today-sep">·</span>
+                        <span>{{ a.employee_name }}</span>
+                      }
+                    </div>
+                  </div>
+                  <span class="appt-status {{ 'status-' + a.status }}">{{ a.status }}</span>
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
+    @if (nextCustomerBooking(); as nb) {
+      <section class="dash-section">
+        <header class="dash-section-head">
+          <h2>Your next booking</h2>
+          <a routerLink="/my-appointments" class="head-link">View all →</a>
+        </header>
+        <a routerLink="/my-appointments" class="next-card">
+          <div class="next-time">
+            <div class="next-date">{{ nb.starts_at | date:'MMM d' }}</div>
+            <div class="next-hour">{{ nb.starts_at | date:'h:mm a' }}</div>
+          </div>
+          <div class="next-main">
+            <div class="next-name">{{ nb.business_name }}</div>
+            @if (nb.employee_name) {
+              <div class="next-meta">with {{ nb.employee_name }}</div>
+            }
+          </div>
+          <span class="next-arrow">→</span>
+        </a>
+      </section>
+    }
+
+    @if (hasWorkplaces()) {
+      <section class="dash-section">
+        <header class="dash-section-head">
+          <h2>Your workplaces</h2>
+        </header>
+        <div class="workplace-grid">
           @for (b of myBusinesses(); track b.id) {
-            <a class="biz-row" [routerLink]="['/businesses', b.slug, 'manage']">
-              <div class="biz-row-main">
-                <span class="logo-mark-img logo-mark-md">
-                  @if (b.logo_url) {
-                    <img [src]="b.logo_url" [alt]="b.name" />
-                  } @else {
-                    {{ b.name.charAt(0).toUpperCase() }}
-                  }
-                </span>
-                <div>
-                  <div class="biz-name">{{ b.name }}</div>
-                  @if (b.description) {
-                    <div class="biz-desc">{{ b.description }}</div>
-                  }
-                </div>
+            <a class="workplace-card" [routerLink]="['/businesses', b.slug, 'manage']">
+              <span class="logo-mark-img logo-mark-md">
+                @if (b.logo_url) {
+                  <img [src]="b.logo_url" [alt]="b.name" />
+                } @else {
+                  {{ b.name.charAt(0).toUpperCase() }}
+                }
+              </span>
+              <div class="workplace-main">
+                <div class="workplace-name">{{ b.name }}</div>
+                <div class="workplace-role">Owner</div>
               </div>
-              <span class="biz-status">{{ b.subscription_status }}</span>
+              <span class="workplace-arrow">→</span>
+            </a>
+          }
+          @for (j of myJobs(); track j.employee_id) {
+            <a class="workplace-card" [routerLink]="['/my-jobs', j.business_slug]">
+              <span class="logo-mark-img logo-mark-md">
+                @if (j.business_logo_url) {
+                  <img [src]="j.business_logo_url" [alt]="j.business_name" />
+                } @else {
+                  {{ j.business_name.charAt(0).toUpperCase() }}
+                }
+              </span>
+              <div class="workplace-main">
+                <div class="workplace-name">{{ j.business_name }}</div>
+                <div class="workplace-role">Staff · {{ j.employee_name }}</div>
+              </div>
+              <span class="workplace-arrow">→</span>
             </a>
           }
         </div>
       </section>
     }
+
+    <div class="action-grid">
+      <a routerLink="/businesses" class="action-card">
+        <div class="action-icon">🔍</div>
+        <div class="action-text">
+          <h2>Browse businesses</h2>
+          <p>Find a salon, clinic, or studio and book in seconds.</p>
+        </div>
+        <span class="action-arrow">→</span>
+      </a>
+      @if (myBusinesses().length === 0) {
+        <a routerLink="/businesses/new" class="action-card featured">
+          <div class="action-icon">✨</div>
+          <div class="action-text">
+            <h2>Start your business</h2>
+            <p>Pick a plan, set up your calendar, take online bookings.</p>
+          </div>
+          <span class="action-arrow">→</span>
+        </a>
+      }
+    </div>
+
   </div>
 </section>
