@@ -448,3 +448,9 @@
 
 .done-heading { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
 .done-detail  { font-size: 14px; color: var(--color-ink-muted); margin: 0; }
+
+@media (max-width: 600px) {
+  .page { padding: var(--space-4) 0 var(--space-8); }
+  .biz-banner { aspect-ratio: 16 / 7; margin-bottom: var(--space-3); }
+  .biz-header { margin-bottom: var(--space-6); padding-bottom: var(--space-5); }
+}

@@ -125,6 +125,10 @@ em {
   padding: 0 24px;
 }
 
+@media (max-width: 600px) {
+  .container { padding: 0 12px; }
+}
+
 .eyebrow {
   display: inline-flex;
   align-items: center;

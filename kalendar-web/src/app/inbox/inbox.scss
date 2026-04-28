@@ -6,6 +6,11 @@
   margin: 0 auto;
 }
 
+@media (max-width: 600px) {
+  .page { padding: var(--space-6) 0; }
+  .notif { padding: var(--space-4); border-radius: var(--radius-md); }
+}
+
 .actions-bar {
   display: flex;
   justify-content: flex-end;

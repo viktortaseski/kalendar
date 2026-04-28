@@ -2,6 +2,13 @@
 
 .page { padding: var(--space-10) 0 var(--space-12); }
 
+@media (max-width: 600px) {
+  .page { padding: var(--space-6) 0; }
+  .biz-grid { grid-template-columns: 1fr; gap: var(--space-3); }
+  .biz-card { border-radius: var(--radius-md); }
+  .search-bar { margin-bottom: var(--space-5); }
+}
+
 /* Tighter head margin + bigger title for the search landing */
 .page-head { margin-bottom: var(--space-6); }
 .page-title { font-size: clamp(32px, 4.5vw, 48px); }

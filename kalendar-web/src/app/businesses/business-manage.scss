@@ -446,6 +446,16 @@
 
   .plan-cards { grid-template-columns: 1fr; }
 
-  .tabs { gap: 2px; }
+  .tabs { gap: 2px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .tab  { padding: 8px 12px; font-size: 13px; }
+}
+
+@media (max-width: 600px) {
+  .page { padding: var(--space-6) 0; }
+  .card-block {
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-4);
+  }
+  .block-head { margin-bottom: var(--space-3); }
 }

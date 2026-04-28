@@ -23,5 +23,31 @@
         <a routerLink="/register" class="btn-cta">Get started</a>
       }
     </div>
+
+    <button
+      type="button"
+      class="nav-hamburger"
+      [class.open]="menuOpen()"
+      (click)="toggleMenu()"
+      aria-label="Toggle navigation"
+    >
+      <span></span><span></span><span></span>
+    </button>
   </div>
+
+  @if (menuOpen()) {
+    <div class="nav-mobile-panel">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="m-link">Home</a>
+      <a routerLink="/businesses" routerLinkActive="active" class="m-link">Browse</a>
+      <a routerLink="/pricing" routerLinkActive="active" class="m-link">Pricing</a>
+      @if (auth.isLoggedIn()) {
+        <a routerLink="/dashboard" routerLinkActive="active" class="m-link">Dashboard</a>
+        <button type="button" class="m-link m-link-button" (click)="logout()">Log out</button>
+      } @else {
+        <a routerLink="/login" class="m-link">Log in</a>
+        <a routerLink="/register" class="m-cta">Get started</a>
+      }
+    </div>
+    <div class="nav-mobile-backdrop" (click)="closeMenu()"></div>
+  }
 </header>

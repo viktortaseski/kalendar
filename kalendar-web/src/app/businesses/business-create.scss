@@ -184,6 +184,7 @@
 }
 
 @media (max-width: 600px) {
+  .page { padding: var(--space-6) 0; }
   .plan-grid,
   .row { grid-template-columns: 1fr; }
 

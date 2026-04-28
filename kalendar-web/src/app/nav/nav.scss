@@ -127,19 +127,114 @@
   white-space: nowrap;
 }
 
-@media (max-width: 860px) {
-  .nav-links {
-    display: none;
+.nav-hamburger {
+  display: none;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s ease;
+
+  span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--color-ink);
+    border-radius: 1px;
+    transition: transform 0.2s ease, opacity 0.15s ease;
   }
+
+  &:hover { background: var(--color-bg-elevated); }
+
+  &.open {
+    span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    span:nth-child(2) { opacity: 0; }
+    span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  }
+}
+
+.nav-mobile-panel {
+  display: none;
+}
+
+.nav-mobile-backdrop {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .nav-links { display: none; }
+  .nav-actions { display: none; }
 
   .nav-inner {
     height: 64px;
+    gap: var(--space-3);
+  }
+
+  .nav-hamburger { display: flex; }
+
+  .nav-mobile-panel {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-3) var(--space-4) var(--space-5);
+    gap: 2px;
+    z-index: 60;
+    box-shadow: var(--shadow-md);
+  }
+
+  .nav-mobile-backdrop {
+    display: block;
+    position: fixed;
+    inset: 64px 0 0 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 49;
+  }
+
+  .m-link {
+    padding: 12px 14px;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-ink);
+    border-radius: var(--radius-md);
+    text-align: left;
+
+    &:hover { background: var(--color-bg-elevated); }
+    &.active { color: var(--color-accent); background: var(--color-accent-soft); }
+  }
+
+  .m-link-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    width: 100%;
+  }
+
+  .m-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: var(--space-2);
+    padding: 12px 18px;
+    background: var(--color-ink);
+    color: white;
+    border-radius: var(--radius-pill);
+    font-size: 15px;
+    font-weight: 500;
+
+    &:hover { background: var(--color-accent); }
   }
 }
 
-@media (max-width: 480px) {
-  .link-btn,
-  .user-pill {
-    display: none;
-  }
-}

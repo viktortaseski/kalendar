@@ -170,3 +170,14 @@
   .grid-3 { grid-template-columns: 1fr; }
   .row { flex-wrap: wrap; }
 }
+
+@media (max-width: 600px) {
+  .page { padding: var(--space-6) 0; }
+  .card-block {
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-4);
+  }
+  .block-head { margin-bottom: var(--space-3); }
+  .job-head-row { gap: var(--space-3); }
+}
