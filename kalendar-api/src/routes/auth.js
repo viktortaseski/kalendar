@@ -20,6 +20,7 @@ function publicUser(row) {
     email: row.email,
     fullName: row.full_name,
     phone: row.phone,
+    avatarUrl: row.avatar_url ?? null,
   };
 }
 

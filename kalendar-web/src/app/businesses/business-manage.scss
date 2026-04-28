@@ -89,6 +89,27 @@
 
 .row-actions { display: flex; gap: var(--space-2); }
 
+.row-with-upload { flex-wrap: wrap; }
+
+.row-upload {
+  summary {
+    cursor: pointer;
+    font-size: 12.5px;
+    color: var(--color-ink-muted);
+    padding: 4px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    list-style: none;
+    user-select: none;
+    &::-webkit-details-marker { display: none; }
+    &:hover { border-color: var(--color-border-strong); color: var(--color-ink); }
+  }
+  &[open] {
+    flex-basis: 100%;
+    padding-top: var(--space-3);
+  }
+}
+
 .row-select {
   padding: 6px 12px;
   background: var(--color-bg-elevated);

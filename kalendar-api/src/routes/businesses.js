@@ -615,6 +615,83 @@ businesses.get('/:slug/appointments', requireAuth, async (req, res) => {
   }
 });
 
+// PUT /:slug/images — owner only, update logo_url and/or banner_url
+businesses.put('/:slug/images', requireAuth, async (req, res) => {
+  try {
+    const r = await loadBySlug(req.params.slug, true, req.user.sub);
+    if (r.error) return res.status(r.status).json({ error: r.error });
+
+    const { logoUrl, bannerUrl } = req.body || {};
+    if (logoUrl === undefined && bannerUrl === undefined) {
+      return res.status(400).json({ error: 'logoUrl or bannerUrl required' });
+    }
+
+    const result = await db.query(
+      `UPDATE businesses
+         SET logo_url   = COALESCE($1, logo_url),
+             banner_url = COALESCE($2, banner_url),
+             updated_at = NOW()
+       WHERE id = $3
+       RETURNING logo_url, banner_url`,
+      [logoUrl ?? null, bannerUrl ?? null, r.business.id]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('PUT business images failed:', err);
+    res.status(500).json({ error: err.message || 'Failed to update images' });
+  }
+});
+
+// PUT /:slug/services/:id/image — owner only, set image_url (pass null to clear)
+businesses.put('/:slug/services/:id/image', requireAuth, async (req, res) => {
+  try {
+    const r = await loadBySlug(req.params.slug, true, req.user.sub);
+    if (r.error) return res.status(r.status).json({ error: r.error });
+
+    const { imageUrl } = req.body || {};
+    if (imageUrl === undefined) {
+      return res.status(400).json({ error: 'imageUrl required (or null to clear)' });
+    }
+
+    const result = await db.query(
+      `UPDATE services SET image_url = $1
+        WHERE id = $2 AND business_id = $3
+        RETURNING id, image_url`,
+      [imageUrl, req.params.id, r.business.id]
+    );
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Service not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('PUT service image failed:', err);
+    res.status(500).json({ error: err.message || 'Failed to update service image' });
+  }
+});
+
+// PUT /:slug/employees/:id/image — owner only, set avatar_url (pass null to clear)
+businesses.put('/:slug/employees/:id/image', requireAuth, async (req, res) => {
+  try {
+    const r = await loadBySlug(req.params.slug, true, req.user.sub);
+    if (r.error) return res.status(r.status).json({ error: r.error });
+
+    const { avatarUrl } = req.body || {};
+    if (avatarUrl === undefined) {
+      return res.status(400).json({ error: 'avatarUrl required (or null to clear)' });
+    }
+
+    const result = await db.query(
+      `UPDATE employees SET avatar_url = $1
+        WHERE id = $2 AND business_id = $3
+        RETURNING id, avatar_url`,
+      [avatarUrl, req.params.id, r.business.id]
+    );
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Employee not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('PUT employee image failed:', err);
+    res.status(500).json({ error: err.message || 'Failed to update employee image' });
+  }
+});
+
 // PUT /:slug/settings — owner only, update name / timezone / slot duration
 businesses.put('/:slug/settings', requireAuth, async (req, res) => {
   try {

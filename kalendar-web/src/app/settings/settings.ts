@@ -1,8 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { ImageUpload } from '../shared/image-upload';
 
 @Component({
   selector: 'app-settings',
+  imports: [ImageUpload],
   template: `
     <section class="page">
       <div class="container">
@@ -12,14 +14,13 @@ import { AuthService } from '../services/auth.service';
           <section class="card">
             <h2 class="card-title">Account</h2>
             <div class="account-head">
-              <span class="avatar avatar-lg">
-                @if (u.avatarUrl) {
-                  <img [src]="u.avatarUrl" [alt]="u.fullName" />
-                } @else {
-                  {{ u.fullName.charAt(0).toUpperCase() }}
-                }
-              </span>
-              <button type="button" class="btn-secondary" disabled>Upload photo</button>
+              <app-image-upload
+                [currentUrl]="u.avatarUrl"
+                [target]="{ kind: 'user-avatar' }"
+                [round]="true"
+                (uploaded)="onAvatarUploaded($event)"
+                (cleared)="onAvatarCleared()"
+              />
             </div>
             <div class="row">
               <span class="label">Full name</span>
@@ -101,4 +102,11 @@ import { AuthService } from '../services/auth.service';
 })
 export class Settings {
   protected auth = inject(AuthService);
+
+  onAvatarUploaded(url: string) {
+    this.auth.updateAvatar(url).subscribe();
+  }
+  onAvatarCleared() {
+    this.auth.updateAvatar(null).subscribe();
+  }
 }

@@ -58,6 +58,24 @@ export class AuthService {
     }
   }
 
+  updateAvatar(avatarUrl: string | null): Observable<{ id: number; avatar_url: string | null }> {
+    return this.http.put<{ id: number; avatar_url: string | null }>(
+      `${environment.apiBaseUrl}/users/me/avatar`,
+      { avatarUrl },
+    ).pipe(
+      tap((res) => {
+        const u = this.currentUser();
+        if (u) {
+          const next: User = { ...u, avatarUrl: res.avatar_url };
+          this.currentUser.set(next);
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem(USER_KEY, JSON.stringify(next));
+          }
+        }
+      }),
+    );
+  }
+
   getToken(): string | null {
     if (typeof localStorage === 'undefined') return null;
     return localStorage.getItem(TOKEN_KEY);

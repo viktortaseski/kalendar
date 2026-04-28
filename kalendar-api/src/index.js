@@ -7,6 +7,7 @@ import businesses from './routes/businesses.js';
 import appointments from './routes/appointments.js';
 import notifications from './routes/notifications.js';
 import invites from './routes/invites.js';
+import uploads from './routes/uploads.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,6 +27,7 @@ app.use('/api/users', users);
 app.use('/api/businesses', businesses);
 app.use('/api/notifications', notifications);
 app.use('/api/invites', invites);
+app.use('/api/uploads', uploads);
 
 app.listen(PORT, () => {
   console.log(`Kalendar-api listening on http://localhost:${PORT}`);

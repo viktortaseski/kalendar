@@ -16,6 +16,7 @@ import { AuthService } from '../services/auth.service';
 import { PlanService, Plan } from '../services/plan.service';
 import { environment } from '../../environments/environment';
 import { TimezoneGroup, getGroupedTimezones } from '../timezones';
+import { ImageUpload } from '../shared/image-upload';
 
 type Tab = 'appointments' | 'staff' | 'settings' | 'plans' | 'billing';
 
@@ -31,7 +32,7 @@ const DAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fri
 
 @Component({
   selector: 'app-business-manage',
-  imports: [ReactiveFormsModule, RouterLink, DatePipe],
+  imports: [ReactiveFormsModule, RouterLink, DatePipe, ImageUpload],
   templateUrl: './business-manage.html',
   styleUrl: './business-manage.scss',
 })
@@ -459,6 +460,34 @@ export class BusinessManage implements OnInit {
           this.settingsSaving.set(false);
         },
       });
+  }
+
+  // ─── Images ──────────────────────────────────────────────
+  onLogoUploaded(url: string | null) {
+    this.api.updateImages(this.slug, { logoUrl: url }).subscribe({
+      next: () => this.business.update((b) => (b ? { ...b, logo_url: url } : b)),
+    });
+  }
+  onBannerUploaded(url: string | null) {
+    this.api.updateImages(this.slug, { bannerUrl: url }).subscribe({
+      next: () => this.business.update((b) => (b ? { ...b, banner_url: url } : b)),
+    });
+  }
+  onServiceImageUploaded(s: Service, url: string | null) {
+    this.api.updateServiceImage(this.slug, s.id, url).subscribe({
+      next: () =>
+        this.services.update((rows) =>
+          rows.map((r) => (r.id === s.id ? { ...r, image_url: url } : r)),
+        ),
+    });
+  }
+  onEmployeeImageUploaded(e: Employee, url: string | null) {
+    this.api.updateEmployeeImage(this.slug, e.id, url).subscribe({
+      next: () =>
+        this.employees.update((rows) =>
+          rows.map((r) => (r.id === e.id ? { ...r, avatar_url: url } : r)),
+        ),
+    });
   }
 
   // ─── Plans ───────────────────────────────────────────────

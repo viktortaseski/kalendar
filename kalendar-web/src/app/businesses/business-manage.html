@@ -87,7 +87,7 @@
           } @else {
             <ul class="row-list">
               @for (s of services(); track s.id) {
-                <li class="row">
+                <li class="row row-with-upload">
                   <span class="logo-mark-img logo-mark-md">
                     @if (s.image_url) {
                       <img [src]="s.image_url" [alt]="s.name" />
@@ -107,6 +107,15 @@
                       <span>€{{ s.price }}</span>
                     }
                   </div>
+                  <details class="row-upload">
+                    <summary>Image</summary>
+                    <app-image-upload
+                      [currentUrl]="s.image_url"
+                      [target]="{ kind: 'service-image', slug: b.slug, serviceId: s.id }"
+                      (uploaded)="onServiceImageUploaded(s, $event)"
+                      (cleared)="onServiceImageUploaded(s, null)"
+                    />
+                  </details>
                   <button class="row-delete" type="button" (click)="removeService(s)">Delete</button>
                 </li>
               }
@@ -138,7 +147,7 @@
           } @else {
             <ul class="row-list">
               @for (e of employees(); track e.id) {
-                <li class="row" [class.selected]="e.id === selectedEmployeeId()">
+                <li class="row row-with-upload" [class.selected]="e.id === selectedEmployeeId()">
                   <span class="avatar avatar-md">
                     @if (e.avatar_url) {
                       <img [src]="e.avatar_url" [alt]="e.name" />
@@ -152,6 +161,16 @@
                       <div class="row-desc">{{ e.email }}</div>
                     }
                   </div>
+                  <details class="row-upload">
+                    <summary>Photo</summary>
+                    <app-image-upload
+                      [currentUrl]="e.avatar_url"
+                      [target]="{ kind: 'employee-avatar', slug: b.slug, employeeId: e.id }"
+                      [round]="true"
+                      (uploaded)="onEmployeeImageUploaded(e, $event)"
+                      (cleared)="onEmployeeImageUploaded(e, null)"
+                    />
+                  </details>
                   <div class="row-actions">
                     <button class="row-select" type="button" (click)="selectEmployee(e.id)">
                       {{ e.id === selectedEmployeeId() ? 'Editing hours' : 'Edit hours' }}
@@ -278,33 +297,30 @@
         <section class="card-block">
           <header class="block-head">
             <h2>Brand assets</h2>
-            <p>Logo and banner for your public booking page. Upload coming soon.</p>
+            <p>Logo and banner for your public booking page.</p>
           </header>
 
           <div class="brand-grid">
             <div class="brand-field">
               <span class="settings-label">Logo</span>
-              <div class="brand-logo-preview">
-                <span class="logo-mark-img logo-mark-lg">
-                  @if (b.logo_url) {
-                    <img [src]="b.logo_url" [alt]="b.name + ' logo'" />
-                  } @else {
-                    {{ b.name.charAt(0).toUpperCase() }}
-                  }
-                </span>
-                <button type="button" class="btn-secondary" disabled>Upload logo</button>
-              </div>
+              <app-image-upload
+                [currentUrl]="b.logo_url"
+                [target]="{ kind: 'business-logo', slug: b.slug }"
+                [round]="true"
+                (uploaded)="onLogoUploaded($event)"
+                (cleared)="onLogoUploaded(null)"
+              />
               <span class="settings-hint">Square. Shown in lists, sidebar, and your booking page header.</span>
             </div>
 
             <div class="brand-field">
               <span class="settings-label">Banner</span>
-              <div class="brand-banner-preview banner-img" [class.empty]="!b.banner_url">
-                @if (b.banner_url) {
-                  <img [src]="b.banner_url" [alt]="b.name + ' banner'" />
-                }
-              </div>
-              <button type="button" class="btn-secondary" disabled>Upload banner</button>
+              <app-image-upload
+                [currentUrl]="b.banner_url"
+                [target]="{ kind: 'business-banner', slug: b.slug }"
+                (uploaded)="onBannerUploaded($event)"
+                (cleared)="onBannerUploaded(null)"
+              />
               <span class="settings-hint">Wide hero image at the top of your public business page.</span>
             </div>
           </div>

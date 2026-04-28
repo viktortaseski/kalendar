@@ -206,6 +206,39 @@ export class BusinessService {
     return this.http.put<{ plan_id: number }>(`${this.base}/${slug}/plan`, { planId });
   }
 
+  // Images (owner-only)
+  updateImages(
+    slug: string,
+    payload: { logoUrl?: string | null; bannerUrl?: string | null },
+  ): Observable<{ logo_url: string | null; banner_url: string | null }> {
+    return this.http.put<{ logo_url: string | null; banner_url: string | null }>(
+      `${this.base}/${slug}/images`,
+      payload,
+    );
+  }
+
+  updateServiceImage(
+    slug: string,
+    serviceId: number,
+    imageUrl: string | null,
+  ): Observable<{ id: number; image_url: string | null }> {
+    return this.http.put<{ id: number; image_url: string | null }>(
+      `${this.base}/${slug}/services/${serviceId}/image`,
+      { imageUrl },
+    );
+  }
+
+  updateEmployeeImage(
+    slug: string,
+    employeeId: number,
+    avatarUrl: string | null,
+  ): Observable<{ id: number; avatar_url: string | null }> {
+    return this.http.put<{ id: number; avatar_url: string | null }>(
+      `${this.base}/${slug}/employees/${employeeId}/image`,
+      { avatarUrl },
+    );
+  }
+
   // Working hours
   getWorkingHours(slug: string, employeeId: number): Observable<WorkingHourRow[]> {
     return this.http.get<WorkingHourRow[]>(
