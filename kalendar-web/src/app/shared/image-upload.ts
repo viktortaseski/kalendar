@@ -37,12 +37,13 @@ import { UploadService, UploadTarget } from '../services/upload.service';
     </div>
   `,
   styles: [`
-    :host { display: block; }
+    :host { display: block; width: 100%; flex: 1; }
     .image-upload {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: var(--space-3);
-      align-items: flex-start;
+      align-items: center;
+      justify-content: space-between;
     }
     .preview {
       width: 160px;
