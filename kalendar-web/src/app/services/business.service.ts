@@ -60,7 +60,7 @@ export interface Service {
   id: number;
   name: string;
   duration_minutes: number;
-  price_cents: number | null;
+  price: number | null;
   description: string | null;
   active: boolean;
   image_url: string | null;
@@ -129,7 +129,7 @@ export class BusinessService {
   }
   createService(
     slug: string,
-    p: { name: string; durationMinutes: number; priceCents?: number; description?: string },
+    p: { name: string; durationMinutes: number; price?: number; description?: string },
   ) {
     return this.http.post<Service>(`${this.base}/${slug}/services`, p);
   }

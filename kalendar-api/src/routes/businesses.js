@@ -209,7 +209,7 @@ businesses.get('/:slug/services', async (req, res) => {
     if (r.error) return res.status(r.status).json({ error: r.error });
 
     const result = await db.query(
-      `SELECT id, name, duration_minutes, price_cents, description, active
+      `SELECT id, name, duration_minutes, price, description, active
        FROM services WHERE business_id = $1
        ORDER BY active DESC, name ASC`,
       [r.business.id]
@@ -227,19 +227,22 @@ businesses.post('/:slug/services', requireAuth, async (req, res) => {
     const r = await loadBySlug(req.params.slug, true, req.user.sub);
     if (r.error) return res.status(r.status).json({ error: r.error });
 
-    const { name, durationMinutes, priceCents, description } = req.body || {};
+    const { name, durationMinutes, price, description } = req.body || {};
     if (!name || !durationMinutes) {
       return res.status(400).json({ error: 'name and durationMinutes are required' });
     }
     if (durationMinutes <= 0) {
       return res.status(400).json({ error: 'durationMinutes must be positive' });
     }
+    if (price != null && price < 0) {
+      return res.status(400).json({ error: 'price must be zero or positive' });
+    }
 
     const insert = await db.query(
-      `INSERT INTO services (business_id, name, duration_minutes, price_cents, description)
+      `INSERT INTO services (business_id, name, duration_minutes, price, description)
        VALUES ($1, $2, $3, $4, $5)
-       RETURNING id, name, duration_minutes, price_cents, description, active`,
-      [r.business.id, name, durationMinutes, priceCents ?? null, description || null]
+       RETURNING id, name, duration_minutes, price, description, active`,
+      [r.business.id, name, durationMinutes, price ?? null, description || null]
     );
     res.status(201).json(insert.rows[0]);
   } catch (err) {

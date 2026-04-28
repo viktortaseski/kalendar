@@ -1,6 +1,6 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import * as QRCode from 'qrcode';
@@ -31,7 +31,7 @@ const DAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fri
 
 @Component({
   selector: 'app-business-manage',
-  imports: [ReactiveFormsModule, RouterLink, DecimalPipe, DatePipe],
+  imports: [ReactiveFormsModule, RouterLink, DatePipe],
   templateUrl: './business-manage.html',
   styleUrl: './business-manage.scss',
 })
@@ -62,7 +62,7 @@ export class BusinessManage implements OnInit {
   serviceForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
     durationMinutes: [30, [Validators.required, Validators.min(5)]],
-    priceCents: [0, [Validators.min(0)]],
+    price: [0, [Validators.min(0)]],
     description: [''],
   });
 
@@ -249,13 +249,13 @@ export class BusinessManage implements OnInit {
       .createService(this.slug, {
         name: v.name,
         durationMinutes: v.durationMinutes,
-        priceCents: v.priceCents > 0 ? v.priceCents : undefined,
+        price: v.price > 0 ? v.price : undefined,
         description: v.description || undefined,
       })
       .subscribe({
         next: (created) => {
           this.services.update((rows) => [...rows, created]);
-          this.serviceForm.reset({ name: '', durationMinutes: 30, priceCents: 0, description: '' });
+          this.serviceForm.reset({ name: '', durationMinutes: 30, price: 0, description: '' });
         },
         error: (err) => this.serviceError.set(err?.error?.error || 'Failed to add service'),
       });

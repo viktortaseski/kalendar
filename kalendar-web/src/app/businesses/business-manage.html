@@ -103,8 +103,8 @@
                   </div>
                   <div class="row-meta">
                     <span>{{ s.duration_minutes }} min</span>
-                    @if (s.price_cents !== null) {
-                      <span>${{ s.price_cents / 100 | number:'1.2-2' }}</span>
+                    @if (s.price !== null) {
+                      <span>€{{ s.price }}</span>
                     }
                   </div>
                   <button class="row-delete" type="button" (click)="removeService(s)">Delete</button>
@@ -117,7 +117,7 @@
             <div class="grid-4">
               <input type="text" formControlName="name" placeholder="Service name (e.g. Haircut)" />
               <input type="number" formControlName="durationMinutes" min="5" step="5" placeholder="Minutes" />
-              <input type="number" formControlName="priceCents" min="0" step="100" placeholder="Price (cents)" />
+              <input type="number" formControlName="price" min="0" step="1" placeholder="Price (€)" />
               <input type="text" formControlName="description" placeholder="Description (optional)" />
             </div>
             <button type="submit" class="btn-add">+ Add service</button>
