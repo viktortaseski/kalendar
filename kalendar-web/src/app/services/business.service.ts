@@ -153,8 +153,14 @@ export class BusinessService {
   }
 
   // Availability & Appointments
-  getAvailability(slug: string, employeeId: number, date: string): Observable<{ slots: string[] }> {
-    const params = new HttpParams().set('date', date);
+  getAvailability(
+    slug: string,
+    employeeId: number,
+    date: string,
+    serviceId?: number,
+  ): Observable<{ slots: string[] }> {
+    let params = new HttpParams().set('date', date);
+    if (serviceId) params = params.set('serviceId', String(serviceId));
     return this.http.get<{ slots: string[] }>(
       `${this.base}/${slug}/employees/${employeeId}/availability`,
       { params },

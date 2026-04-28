@@ -130,8 +130,49 @@
           <button class="bm-close" (click)="closeBooking()">✕</button>
         </div>
 
+        @if (bookingStep() === 'service') {
+          <div class="bm-body">
+            <p class="bm-step-label">Choose a service</p>
+            @if (services().length === 0) {
+              <p class="bm-state">No services available</p>
+            } @else {
+              <ul class="service-list">
+                @for (svc of services(); track svc.id) {
+                  <li>
+                    <button class="service-card" type="button" (click)="selectService(svc)">
+                      <span class="thumb-img">
+                        @if (svc.image_url) {
+                          <img [src]="svc.image_url" [alt]="svc.name" />
+                        } @else {
+                          ✂
+                        }
+                      </span>
+                      <span class="service-card-main">
+                        <span class="service-name">{{ svc.name }}</span>
+                        @if (svc.description) {
+                          <span class="service-desc">{{ svc.description }}</span>
+                        }
+                        <span class="service-meta">
+                          <span>{{ svc.duration_minutes }} min</span>
+                          @if (svc.price !== null) {
+                            <span class="service-price">€{{ svc.price }}</span>
+                          }
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        }
+
         @if (bookingStep() === 'calendar') {
           <div class="bm-body">
+            @if (selectedService(); as svc) {
+              <button class="bm-back" (click)="bookingStep.set('service')">← Change service</button>
+              <p class="bm-step-label">{{ svc.name }} · {{ svc.duration_minutes }} min</p>
+            }
             <div class="cal-nav">
               <button class="cal-nav-btn" (click)="prevMonth()">‹</button>
               <span class="cal-month-label">{{ calMonthLabel() }}</span>
@@ -161,6 +202,9 @@
         @if (bookingStep() === 'slots') {
           <div class="bm-body">
             <button class="bm-back" (click)="bookingStep.set('calendar')">← Back</button>
+            @if (selectedService(); as svc) {
+              <p class="bm-step-label">{{ svc.name }} · {{ svc.duration_minutes }} min</p>
+            }
             <p class="bm-date-label">{{ formatSelectedDate() }}</p>
             @if (slotsLoading()) {
               <p class="bm-state">Loading available slots…</p>
@@ -179,6 +223,9 @@
         @if (bookingStep() === 'form') {
           <div class="bm-body">
             <button class="bm-back" (click)="bookingStep.set('slots')">← Back</button>
+            @if (selectedService(); as svc) {
+              <p class="bm-step-label">{{ svc.name }} · {{ svc.duration_minutes }} min @if (svc.price !== null) { · €{{ svc.price }} }</p>
+            }
             <p class="bm-date-label">{{ formatSelectedDate() }} · {{ formatSlot(selectedSlot()!) }}</p>
             <div class="form-fields">
               <label class="form-label">
@@ -213,6 +260,9 @@
           <div class="bm-body bm-done">
             <div class="done-check">✓</div>
             <p class="done-heading">You're booked!</p>
+            @if (selectedService(); as svc) {
+              <p class="done-detail">{{ svc.name }}</p>
+            }
             <p class="done-detail">{{ formatSelectedDate() }} at {{ formatSlot(selectedSlot()!) }}</p>
             <p class="done-detail">A confirmation will be sent to your email.</p>
             <button class="btn-book" (click)="closeBooking()">Done</button>

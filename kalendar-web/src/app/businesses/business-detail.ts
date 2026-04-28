@@ -5,6 +5,7 @@ import {
   StaffMember,
   WorkingHourRow,
   BusinessDetail as BusinessDetailModel,
+  Service,
 } from '../services/business.service';
 import { AuthService } from '../services/auth.service';
 
@@ -30,6 +31,7 @@ export class BusinessDetail implements OnInit {
 
   business = signal<BusinessDetailModel | null>(null);
   staff = signal<StaffMember[]>([]);
+  services = signal<Service[]>([]);
   loading = signal(true);
   errorMessage = signal<string | null>(null);
 
@@ -41,7 +43,8 @@ export class BusinessDetail implements OnInit {
 
   // ── Booking state ─────────────────────────────────────────
   selectedMember = signal<StaffMember | null>(null);
-  bookingStep = signal<'calendar' | 'slots' | 'form' | 'done'>('calendar');
+  bookingStep = signal<'service' | 'calendar' | 'slots' | 'form' | 'done'>('service');
+  selectedService = signal<Service | null>(null);
   calMonth = signal(new Date());
   selectedDate = signal<string | null>(null);
   availableSlots = signal<string[]>([]);
@@ -103,6 +106,11 @@ export class BusinessDetail implements OnInit {
       next: (rows) => this.staff.set(rows),
       error: () => this.staff.set([]),
     });
+
+    this.businesses.listServices(slug).subscribe({
+      next: (rows) => this.services.set(rows.filter((s) => s.active)),
+      error: () => this.services.set([]),
+    });
   }
 
   weekFor(staff: StaffMember): { label: string; hours: WorkingHourRow[] }[] {
@@ -123,15 +131,21 @@ export class BusinessDetail implements OnInit {
   // ── Booking actions ────────────────────────────────────────
   openBooking(member: StaffMember) {
     this.selectedMember.set(member);
-    this.bookingStep.set('calendar');
+    this.selectedService.set(null);
     this.calMonth.set(new Date());
     this.selectedDate.set(null);
     this.selectedSlot.set(null);
     this.availableSlots.set([]);
     this.bookingError.set(null);
+    this.bookingStep.set(this.services().length > 0 ? 'service' : 'calendar');
   }
 
   closeBooking() { this.selectedMember.set(null); }
+
+  selectService(service: Service) {
+    this.selectedService.set(service);
+    this.bookingStep.set('calendar');
+  }
 
   prevMonth() {
     const m = this.calMonth();
@@ -150,10 +164,12 @@ export class BusinessDetail implements OnInit {
     this.slotsLoading.set(true);
     this.availableSlots.set([]);
 
-    this.businesses.getAvailability(slug, this.selectedMember()!.id, dateStr).subscribe({
-      next: (r) => { this.availableSlots.set(r.slots); this.slotsLoading.set(false); },
-      error: () => { this.availableSlots.set([]); this.slotsLoading.set(false); },
-    });
+    this.businesses
+      .getAvailability(slug, this.selectedMember()!.id, dateStr, this.selectedService()?.id)
+      .subscribe({
+        next: (r) => { this.availableSlots.set(r.slots); this.slotsLoading.set(false); },
+        error: () => { this.availableSlots.set([]); this.slotsLoading.set(false); },
+      });
   }
 
   selectSlot(slot: string) {
@@ -179,6 +195,7 @@ export class BusinessDetail implements OnInit {
       customerEmail: email.trim(),
       customerPhone: phone.trim() || undefined,
       notes: notes.trim() || undefined,
+      serviceId: this.selectedService()?.id,
     }).subscribe({
       next: () => { this.bookingLoading.set(false); this.bookingStep.set('done'); },
       error: (err) => {
