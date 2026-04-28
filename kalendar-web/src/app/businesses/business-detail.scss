@@ -7,6 +7,12 @@
   aspect-ratio: 5 / 1;
 }
 
+.biz-detail-skeleton {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-5);
+}
+
 .biz-header {
   display: flex;
   flex-direction: column;

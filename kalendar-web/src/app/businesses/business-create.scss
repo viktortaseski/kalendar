@@ -96,6 +96,12 @@
   &.selected { border-color: var(--color-accent); background: var(--color-accent-soft); }
 }
 
+.plan-option-skeleton {
+  cursor: default;
+  pointer-events: none;
+  &:hover { border-color: var(--color-border); }
+}
+
 .plan-head {
   display: flex;
   align-items: center;

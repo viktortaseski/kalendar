@@ -36,6 +36,16 @@
   gap: var(--space-5);
 }
 
+.job-skeleton {
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--space-4);
+}
+
+.appt-row-skeleton {
+  pointer-events: none;
+}
+
 .past-toggle-row {
   display: flex;
   justify-content: center;

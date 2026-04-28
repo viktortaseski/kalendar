@@ -7,7 +7,18 @@
     </header>
 
     @if (loading()) {
-      <div class="state-msg">Loading…</div>
+      <ul class="notif-list">
+        @for (i of [1,2,3,4]; track i) {
+          <li class="notif notif-skeleton">
+            <span class="skeleton skeleton-circle" style="width: 36px; height: 36px"></span>
+            <div class="notif-main">
+              <span class="skeleton skeleton-title" style="width: 50%"></span>
+              <span class="skeleton skeleton-text" style="width: 80%; margin-top: 8px"></span>
+              <span class="skeleton skeleton-text" style="width: 30%; margin-top: 6px"></span>
+            </div>
+          </li>
+        }
+      </ul>
     } @else if (pageError()) {
       <div class="state-msg error">{{ pageError() }}</div>
     } @else {

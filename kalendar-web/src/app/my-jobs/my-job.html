@@ -1,7 +1,18 @@
 <section class="page">
   <div class="container">
     @if (loading()) {
-      <div class="state-msg">Loading…</div>
+      <div class="job-skeleton">
+        <span class="skeleton skeleton-text" style="width: 140px"></span>
+        <div class="job-head-row" style="margin-top: 16px">
+          <span class="skeleton skeleton-circle" style="width: 64px; height: 64px"></span>
+          <div style="flex: 1">
+            <span class="skeleton skeleton-title" style="width: 50%; height: 32px"></span>
+            <span class="skeleton skeleton-text" style="width: 70%; margin-top: 10px"></span>
+          </div>
+        </div>
+        <div class="skeleton skeleton-block" style="height: 200px; margin-top: 32px"></div>
+        <div class="skeleton skeleton-block" style="height: 280px; margin-top: 16px"></div>
+      </div>
     } @else if (pageError()) {
       <div class="state-msg error">{{ pageError() }}</div>
     } @else if (job(); as j) {
@@ -32,7 +43,21 @@
         </header>
 
         @if (appointmentsLoading()) {
-          <div class="empty-row">Loading…</div>
+          <ul class="appt-list">
+            @for (i of [1,2,3]; track i) {
+              <li class="appt-row appt-row-skeleton">
+                <div class="appt-main">
+                  <span class="skeleton skeleton-title" style="width: 60%"></span>
+                  <span class="skeleton skeleton-text" style="width: 40%; margin-top: 8px"></span>
+                  <span class="skeleton skeleton-text" style="width: 50%; margin-top: 6px"></span>
+                </div>
+                <div class="appt-right">
+                  <span class="skeleton skeleton-text" style="width: 90px"></span>
+                  <span class="skeleton skeleton-text" style="width: 60px; margin-top: 6px"></span>
+                </div>
+              </li>
+            }
+          </ul>
         } @else if (appointmentsError()) {
           <div class="form-error">{{ appointmentsError() }}</div>
         } @else if (upcomingAppointments().length === 0 && pastAppointments().length === 0) {

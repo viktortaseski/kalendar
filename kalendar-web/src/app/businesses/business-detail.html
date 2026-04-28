@@ -1,7 +1,15 @@
 <section class="page">
   <div class="container">
     @if (loading()) {
-      <div class="state-msg">Loading…</div>
+      <div class="skeleton skeleton-banner"></div>
+      <div class="biz-detail-skeleton">
+        <span class="skeleton skeleton-circle" style="width: 72px; height: 72px"></span>
+        <span class="skeleton skeleton-title" style="width: 50%; margin-top: 16px"></span>
+        <span class="skeleton skeleton-text" style="width: 80%; margin-top: 12px"></span>
+        <span class="skeleton skeleton-text" style="width: 30%; margin-top: 8px"></span>
+        <div class="skeleton skeleton-block" style="height: 120px; margin-top: 32px"></div>
+        <div class="skeleton skeleton-block" style="height: 120px; margin-top: 16px"></div>
+      </div>
     } @else if (errorMessage()) {
       <div class="state-msg error">
         {{ errorMessage() }}
@@ -207,7 +215,7 @@
             }
             <p class="bm-date-label">{{ formatSelectedDate() }}</p>
             @if (slotsLoading()) {
-              <p class="bm-state">Loading available slots…</p>
+              <div class="spinner-center"><span class="spinner"></span></div>
             } @else if (availableSlots().length === 0) {
               <p class="bm-state">No available slots on this day</p>
             } @else {

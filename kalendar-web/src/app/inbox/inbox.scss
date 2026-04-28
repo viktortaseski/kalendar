@@ -45,6 +45,12 @@
   &.unread { background: var(--color-accent-soft); border-color: var(--color-accent-soft); }
 }
 
+.notif-skeleton {
+  cursor: default;
+  pointer-events: none;
+  &:hover { border-color: var(--color-border); }
+}
+
 .notif-icon {
   flex-shrink: 0;
   width: 36px;

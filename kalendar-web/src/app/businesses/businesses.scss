@@ -83,6 +83,11 @@
   flex-shrink: 0;
 }
 
+.biz-card-skeleton {
+  pointer-events: none;
+  &:hover { transform: none; box-shadow: none; border-color: var(--color-border); }
+}
+
 .biz-card-body {
   display: flex;
   gap: var(--space-3);

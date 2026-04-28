@@ -20,7 +20,20 @@
     @if (errorMessage()) {
       <div class="state-msg error">{{ errorMessage() }}</div>
     } @else if (loading()) {
-      <div class="state-msg">Loading…</div>
+      <div class="biz-grid">
+        @for (i of [1,2,3,4,5,6]; track i) {
+          <div class="biz-card biz-card-skeleton">
+            <div class="skeleton skeleton-banner"></div>
+            <div class="biz-card-body">
+              <div class="biz-card-text">
+                <span class="skeleton skeleton-title" style="width: 70%"></span>
+                <span class="skeleton skeleton-text" style="width: 90%; margin-top: 8px"></span>
+                <span class="skeleton skeleton-text" style="width: 40%; margin-top: 8px"></span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
     } @else if (results().length === 0) {
       <div class="state-msg empty">
         @if (query) {

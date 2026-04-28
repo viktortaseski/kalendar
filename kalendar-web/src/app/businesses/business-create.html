@@ -22,7 +22,18 @@
         <fieldset class="step">
           <legend>1. Choose a plan</legend>
           @if (loadingPlans()) {
-            <p class="muted">Loading plans…</p>
+            <div class="plan-grid">
+              @for (i of [1,2,3]; track i) {
+                <div class="plan-option plan-option-skeleton">
+                  <div class="plan-head">
+                    <span class="skeleton skeleton-title" style="width: 80px"></span>
+                  </div>
+                  <span class="skeleton skeleton-title" style="width: 100px; height: 28px; margin-top: 12px"></span>
+                  <span class="skeleton skeleton-text" style="width: 100%; margin-top: 14px"></span>
+                  <span class="skeleton skeleton-text" style="width: 70%; margin-top: 6px"></span>
+                </div>
+              }
+            </div>
           } @else {
             <div class="plan-grid">
               @for (plan of plans(); track plan.id) {
