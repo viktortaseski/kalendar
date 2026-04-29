@@ -8,19 +8,19 @@
 
   <nav class="side-nav">
     <a routerLink="/dashboard" routerLinkActive="active" class="side-link">
-      <span class="side-icon">▦</span>
+      <img src="/images/dashboard-icon.svg" alt="Dashboard" class="side-icon">
       <span>Dashboard</span>
     </a>
-    <a routerLink="/businesses" routerLinkActive="active" class="side-link">
-      <span class="side-icon">⌕</span>
+    <a routerLink="/businesses" routerLinkActive="active" class="side-link">      <!--<span class="side-icon">⌕</span>-->
+      <img src="/images/browse-icon.svg" alt="Browse" class="side-icon">
       <span>Browse</span>
     </a>
     <a routerLink="/my-appointments" routerLinkActive="active" class="side-link">
-      <span class="side-icon">▤</span>
+      <img src="/images/appointments-icon.png" alt="My appointments" class="side-icon">
       <span>My appointments</span>
     </a>
     <a routerLink="/inbox" routerLinkActive="active" class="side-link">
-      <span class="side-icon">✉</span>
+      <img src="/images/inbox-icon.svg" alt="Inbox" class="side-icon">
       <span>Inbox</span>
       @if (notifications.unreadCount() > 0) {
         <span class="side-badge">{{ notifications.unreadCount() }}</span>
@@ -92,7 +92,7 @@
       </div>
     </div>
     <a routerLink="/settings" routerLinkActive="active" class="side-link">
-      <span class="side-icon">⚙</span>
+      <img src="/images/settings-icon.svg" alt="Settings" class="side-icon">
       <span>Settings</span>
     </a>
     <button type="button" class="logout-btn" (click)="logout()">Log out</button>
