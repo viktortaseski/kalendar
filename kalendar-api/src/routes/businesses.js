@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { db } from '../dbConn.js';
 import { requireAuth, tryAuth } from '../middleware/auth.js';
 import { sendEmail } from '../lib/email.js';
-import { bookingConfirmation } from '../lib/emailTemplates.js';
+import { bookingConfirmation, employeeInvite } from '../lib/emailTemplates.js';
 
 const businesses = Router();
 
@@ -840,6 +840,21 @@ businesses.post('/:slug/invites', requireAuth, async (req, res) => {
         ]
       );
       await client.query('COMMIT');
+
+      const inviterRes = await db.query('SELECT full_name FROM users WHERE id = $1', [req.user.sub]);
+      const inviterName = inviterRes.rows[0]?.full_name || null;
+      const { subject, html, text } = employeeInvite({
+        inviteeName: name || invitee.full_name,
+        inviterName,
+        businessName: bizName,
+      });
+      sendEmail({
+        to: { email: trimmedEmail, name: name || invitee.full_name || undefined },
+        subject,
+        html,
+        text,
+      }).catch((err) => console.error('Employee invite email failed:', err));
+
       res.status(201).json(inv.rows[0]);
     } catch (e) {
       await client.query('ROLLBACK').catch(() => {});
