@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { db } from '../dbConn.js';
 import { requireAuth, tryAuth } from '../middleware/auth.js';
+import { sendEmail } from '../lib/email.js';
+import { bookingConfirmation } from '../lib/emailTemplates.js';
 
 const businesses = Router();
 
@@ -542,7 +544,7 @@ businesses.post('/:slug/appointments', tryAuth, async (req, res) => {
     }
 
     const bizResult = await db.query(
-      `SELECT b.id, b.timezone, b.slot_duration_minutes
+      `SELECT b.id, b.name, b.timezone, b.slot_duration_minutes
        FROM businesses b WHERE b.slug = $1 AND b.active = true`,
       [slug]
     );
@@ -551,20 +553,23 @@ businesses.post('/:slug/appointments', tryAuth, async (req, res) => {
     const tz = safeTz(biz.timezone);
 
     const empResult = await db.query(
-      'SELECT id FROM employees WHERE id = $1 AND business_id = $2 AND active = true',
+      'SELECT id, name FROM employees WHERE id = $1 AND business_id = $2 AND active = true',
       [employeeId, biz.id]
     );
     if (empResult.rowCount === 0) return res.status(404).json({ error: 'Employee not found' });
+    const employeeName = empResult.rows[0].name;
 
     // Determine appointment duration from the service (if any) or fall back to slot_duration_minutes
     let durationMinutes = biz.slot_duration_minutes;
+    let serviceName = null;
     if (serviceId) {
       const svcRes = await db.query(
-        'SELECT duration_minutes FROM services WHERE id = $1 AND business_id = $2 AND active = true',
+        'SELECT name, duration_minutes FROM services WHERE id = $1 AND business_id = $2 AND active = true',
         [serviceId, biz.id]
       );
       if (svcRes.rowCount === 0) return res.status(404).json({ error: 'Service not found' });
       durationMinutes = svcRes.rows[0].duration_minutes;
+      serviceName = svcRes.rows[0].name;
     }
 
     const startsRow = await db.query(
@@ -587,7 +592,25 @@ businesses.post('/:slug/appointments', tryAuth, async (req, res) => {
        customerPhone || null, startsRow.rows[0].ts, endsRow.rows[0].ts, notes || null]
     );
 
-    res.status(201).json(insert.rows[0]);
+    const appt = insert.rows[0];
+
+    const { subject, html, text } = bookingConfirmation({
+      customerName,
+      businessName: biz.name,
+      businessSlug: slug,
+      employeeName,
+      serviceName,
+      startsAt: appt.starts_at,
+      timezone: tz,
+    });
+    sendEmail({
+      to: { email: customerEmail, name: customerName },
+      subject,
+      html,
+      text,
+    }).catch((err) => console.error('Booking confirmation email failed:', err));
+
+    res.status(201).json(appt);
   } catch (err) {
     console.error('POST appointment failed:', err);
     res.status(500).json({ error: err.message || 'Failed to create appointment' });
